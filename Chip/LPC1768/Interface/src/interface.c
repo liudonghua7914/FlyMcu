@@ -1640,7 +1640,6 @@ void chipInit(void)
 	PrintWellcomeMsg();	
 	parameterInit();
 	ipcExchangeInit();
-	FS_MMC_HW_X_Init();
 	printf("\r\nparameterInit");
 }
 /***************************************************************************************************************************

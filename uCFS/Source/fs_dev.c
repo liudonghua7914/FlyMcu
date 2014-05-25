@@ -33,7 +33,7 @@ static int FsDevStatus(FS_u32 Unit)
 	int x;
 	int i = 0;
 	static int init =0;
-	printf("\r\n FsDevStatus id: %d",Unit);
+//	printf("\r\n FsDevStatus id: %d",Unit);
 	
 	if(!init)
 	{
@@ -60,7 +60,7 @@ static int FsDevStatus(FS_u32 Unit)
 	if(a)
 	{
 		_FS_mmc_diskchange[Unit] = 0;
-		//FS_MMC_HW_X_Init();
+		FS_MMC_HW_X_Init();
 		x =  FS__MMC_ReadSector(Unit, 0, (unsigned char*)&_FS_mmc_mbrbuffer[0]);
 		if(x != 0)
 		{
@@ -72,16 +72,6 @@ static int FsDevStatus(FS_u32 Unit)
 		_FS_mmc_logicalstart[Unit] += (0x100UL * _FS_mmc_mbrbuffer[0x1c7]);
 		_FS_mmc_logicalstart[Unit] += (0x10000UL * _FS_mmc_mbrbuffer[0x1c8]);
 		_FS_mmc_logicalstart[Unit] += (0x1000000UL * _FS_mmc_mbrbuffer[0x1c9]);
-		
-//		for(i = 0;i < 512;i++)
-//		{
-//			if(!(i % 16))
-//			{
-//				printf("\r\n %08x ",i);
-//			}
-//			printf("%x ",_FS_mmc_mbrbuffer[i]);
-//		}
-		printf("\r\n logicalstart = %08x ",_FS_mmc_logicalstart[Unit]);
 		return FS_LBL_MEDIACHANGED;
 	}
 	return 0;
@@ -95,7 +85,7 @@ static int FsDevStatus(FS_u32 Unit)
 static int FsDevRead(FS_u32 Unit, FS_u32 Sector, void *buffer)
 {
 	int x;
-	printf("\r\n FsDevRead Unit: %d Sector: %d",Unit,Sector);
+//	printf("\r\n FsDevRead Unit: %d Sector: %d",Unit,Sector);
 	if(Unit >= FS_MMC_MAXUNIT)
 	{
 		return -1;
@@ -116,7 +106,7 @@ static int FsDevRead(FS_u32 Unit, FS_u32 Sector, void *buffer)
 static int FsDevWrite(FS_u32 Unit, FS_u32 Sector, void *pBuffer)
 {
 	int x;
-	printf("\r\n FsDevWrite Unit: %d Sector: %d",Unit,Sector);
+//	printf("\r\n FsDevWrite Unit: %d Sector: %d",Unit,Sector);
 
   
 	if (Unit >= FS_MMC_MAXUNIT)
@@ -141,7 +131,7 @@ static int FsDevIoctl(FS_u32 Unit, FS_i32 Cmd, FS_i32 Aux, void *pBuffer)
 	 FS_u32 *info;
 	int x;
 	char a;
-	printf("\r\n FsDevIoctl Unit: %d Cmd: %x Aux: %x",Unit,Cmd,Aux);
+//	printf("\r\n FsDevIoctl Unit: %d Cmd: %x Aux: %x",Unit,Cmd,Aux);
 	Aux = Aux;  /* Get rid of compiler warning */
 	if (Unit >= FS_MMC_MAXUNIT) 
 	{

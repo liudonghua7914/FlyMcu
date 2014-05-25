@@ -4,8 +4,7 @@
 #include "mmc_x_hw.h"
 #define	TIMESMAX  250
 #define ID0		(0x00)
-void FS_MMC_HW_X_ReadWrite(FS_u32 id,FS_u8 *pWrite, int wLen,FS_u8 *pRead, int rLen);
-FS_u8 SectorBuf[520];
+
 FS_u32 SDCardType = 0;
 /*********************************************************************************************************************
 **º¯ÊýÃû³Æ:	  FS_MMC_HW_X_BusyLedOff
@@ -245,17 +244,17 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	if(eSDV2_0_SDHC != SDCardType)
 	{
 		Sector <<= 9;
-		printf("\r\n read offset Addr");
+//		printf("\r\n read offset Addr");
 	}
 	
-	printf("\r\n Read Addr %08x :",Sector);
+//	printf("\r\n Read Addr %08x :",Sector);
 	
 	
 	SendBuf[1] = (Sector >> 24) & 0XFF;
 	SendBuf[2] = (Sector >> 16) & 0XFF;
 	SendBuf[3] = (Sector >> 8) & 0XFF;
 	SendBuf[4] = (Sector >> 0) & 0XFF;
-	#if 1
+	
 	FS_MMC_HW_X_SetCS(Unit,0);
 	FS_MMC_HW_X_WriteBuf(Unit,SendBuf,6);
 	count = 0;
@@ -299,49 +298,17 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 		if(NULL != pBuffer)
 		{
 			FS_MMC_HW_X_ReadSingleBlock(Unit,pBuffer,512,0);	//sizeof(SectorBuf)		
-			//memset(pBuffer,0,512);
 		}
 		else
 		{
 			printf("\r\n Read No place");
 		}
 		
-		
-		
-//		printf("\r\n Setcor: ");
-//		for(i = 0;i < 512;i++)
-//		{
-//			if(!(i % 16))
-//			{
-//				printf("\r\n %08x :",i + Sector);
-//			}
-//			printf("%x ",pBuffer[i]);
-//		}
 	}
 	FS_MMC_HW_X_SetCS(Unit,1);
 	FS_MMC_HW_X_WriteByte(Unit,0XFF);
-	#else
 	
-	
-	FS_MMC_HW_X_ReadWrite(ID0,SendBuf,6,pBuffer,516);
-	if((0X00 ==pBuffer[0]) && (0XFE == pBuffer[1]))
-	{	
-		printf("\r\n Setcor: ");
-		for(i = 0;i < 512;i++)
-		{
-			if(!(i % 16))
-			{
-				printf("\r\n %08x :",i);
-			}
-			printf("%x ",pBuffer[2 + i]);
-		}
-		bRes = TRUE;
-	}
-	else
-	{
-		printf("\r\n read fail");
-	}
-	#endif
+
 	return 0;
 }
 /*********************************************************************************************************************
@@ -369,7 +336,7 @@ int FS__MMC_WriteSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	if(eSDV2_0_SDHC != SDCardType)
 	{
 		Sector <<= 9;
-		printf("\r\n write offset Addr");
+//		printf("\r\n write offset Addr");
 	}
 	SendBuf[1] = (Sector >> 24) & 0XFF;
 	SendBuf[2] = (Sector >> 16) & 0XFF;

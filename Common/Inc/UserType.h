@@ -16,13 +16,15 @@
 #include "def.h"
 #include "ipcdef.h"
 #include "ipcExchange.h"
+#include "flySystemTask.h"
 #include "demoDebugTask.h"
-#include "fileSystemTask.h"
+#include "flyFileTask.h"
 #include "flyeepromTask.h"
 enum ePRIO
 {
 	PRIO_NON = 5,
-	PRIO_FILESYSTE,
+	PRIO_FLYSYSTEM,
+	PRIO_FLYFILE,
 	PRIO_FLYEEPROM,
 	PRIO_DEMO
 };

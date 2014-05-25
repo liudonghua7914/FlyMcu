@@ -55,10 +55,10 @@ void DemoDebugTask(void  *parg)
 {
 	while(1)
 	{
-		printf("\r\n=============================================\r\n");
-		printf("\r\n IO_SDCARDCD = %d",IO_Read(IO_SDCARDCD));
+//		printf("\r\n=============================================\r\n");
+//		printf("\r\n IO_SDCARDCD = %d",IO_Read(IO_SDCARDCD));
 		ipcStartEvent(EVENT_GLOBAL_OPEN_FILE,0,NULL,0);
-		printf("\r\n=============================================\r\n");
+//		printf("\r\n=============================================\r\n");
 //		DemoEEPROM();
 	   	OSTimeDly(OS_TICKS_PER_SEC);  
 	}

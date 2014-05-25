@@ -27,7 +27,6 @@ BOOL WriteEEPROMFrameBuf(BYTE Addr,BYTE *p,UINT Len)
 {
 	BYTE i = 0;
 	BOOL bRes = FALSE;
-	uint16_t cnt;
 	
 	printf("\r\n<<<<<WritEEPROMFrameBuf>>>>>: %x",Addr);
 	for(i = 0;i < Len;i++)
@@ -159,7 +158,8 @@ BOOL checkMessageHaveIdle(UINT Length)
 	{
 		iIdles = _JMLx - _JMHx - 1;
 	}
-
+	OS_EXIT_CRITICAL();
+	
 	if(iIdles > Length)
 	{
 		return TRUE;
@@ -168,7 +168,7 @@ BOOL checkMessageHaveIdle(UINT Length)
 	{
 		return FALSE;
 	}
-	OS_EXIT_CRITICAL();
+	
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	messageToFifo
@@ -178,7 +178,7 @@ BOOL checkMessageHaveIdle(UINT Length)
 ***************************************************************************************************************************/
 void messageToFifo(BYTE *p,UINT length)
 {
-	UINT i = 0;
+
 	BYTE checkSum = 0;
 	checkSum = length + 1;
 	

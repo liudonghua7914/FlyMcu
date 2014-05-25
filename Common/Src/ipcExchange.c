@@ -7,13 +7,18 @@ void ipcExchangeEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)
 {
 	if(enumWhatEvent > EVENT_GLOBAL_INIT_MIN && enumWhatEvent < EVENT_GLOBAL_INIT_MAX)
 	{
-		ipcEventProcFileSystem(enumWhatEvent,lPara,p,length);
+		ipcEventProcflySystem(enumWhatEvent,lPara,p,length);
+		ipcEventProcflyFile(enumWhatEvent,lPara,p,length);
 		ipcEventProcDemoDebug(enumWhatEvent,lPara,p,length);
 		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
 	}
-	else if (enumWhatEvent > EVENT_GLOBAL_FILE_SYSTEM_MIN && enumWhatEvent < EVENT_GLOBAL_FILE_SYSTEM_MAX)
+	else if (enumWhatEvent > EVENT_GLOBAL_FLY_SYSTEM_MIN && enumWhatEvent < EVENT_GLOBAL_FLY_SYSTEM_MAX)
 	{
-		ipcEventProcFileSystem(enumWhatEvent,lPara,p,length);
+		ipcEventProcflySystem(enumWhatEvent,lPara,p,length);
+	}
+	else if (enumWhatEvent > EVENT_GLOBAL_FLY_FILE_MIN && enumWhatEvent < EVENT_GLOBAL_FLY_FILE_MAX)
+	{
+		ipcEventProcflyFile(enumWhatEvent,lPara,p,length);
 	}
 	else if (enumWhatEvent > EVENT_GLOBAL_DEMO_DEBUG_MIN && enumWhatEvent < EVENT_GLOBAL_DEMO_DEBUG_MAX)
 	{
@@ -47,4 +52,3 @@ void ipcExchangeInit(void)
 {
 	memset(&ipcExchangeInfo,0,sizeof(IPC_EXCHANGE_INFO));
 }
-

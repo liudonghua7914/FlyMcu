@@ -3,7 +3,7 @@
 
 #include "def.h"
 #include "includes.h"
-#define  		DEMO_TASK_START_STK_SIZE          500
+#define  		DEMO_TASK_START_STK_SIZE          150
 
 
 #ifndef			_DEMOGOABLE_
