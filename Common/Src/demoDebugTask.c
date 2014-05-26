@@ -35,6 +35,7 @@ void ipcDemoDebugInit(void)
 ***************************************************************************************************************************/
 void ipcEventProcDemoDebug(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length)
 {
+	BOOL bRes = TRUE;
 	switch(enumWhatEvent)
 	{
 		case EVENT_GLOBAL_MODULE_INIT:		ipcDemoDebugInit();
@@ -43,6 +44,11 @@ void ipcEventProcDemoDebug(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t lengt
 		
 		
 		default:							break;
+	}
+	
+	if(bRes)
+	{
+		ipcClearEvent(enumWhatEvent);
 	}
 }
 /***************************************************************************************************************************
@@ -57,7 +63,6 @@ void DemoDebugTask(void  *parg)
 	{
 //		printf("\r\n=============================================\r\n");
 //		printf("\r\n IO_SDCARDCD = %d",IO_Read(IO_SDCARDCD));
-		ipcStartEvent(EVENT_GLOBAL_OPEN_FILE,0,NULL,0);
 //		printf("\r\n=============================================\r\n");
 //		DemoEEPROM();
 	   	OSTimeDly(OS_TICKS_PER_SEC);  

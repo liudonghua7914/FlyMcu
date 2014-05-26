@@ -281,7 +281,18 @@ FS_U16  FS_X_OS_GetTime (void)
 
 int  FS_X_OS_Init (void) 
 {
-    FS_SemFileHandle = OSSemCreate(1);
+	int res = -1;
+	
+	FS_SemFileHandle = NULL;
+	FS_SemFileOps = NULL;
+	FS_SemMemManager = NULL;
+	FS_SemDeviceOps = NULL;
+	#if FS_POSIX_DIR_SUPPORT  
+	FS_SemDirHandle =  NULL;
+	FS_SemDirOps =  NULL;
+	#endif
+	
+	FS_SemFileHandle = OSSemCreate(1);
     FS_SemFileOps    = OSSemCreate(1);
     FS_SemMemManager = OSSemCreate(1);
     FS_SemDeviceOps  = OSSemCreate(1);
@@ -291,7 +302,16 @@ int  FS_X_OS_Init (void)
     FS_SemDirOps     = OSSemCreate(1);
 #endif
 
-    return (0);
+	if(FS_SemFileHandle && FS_SemFileOps && FS_SemMemManager && FS_SemDeviceOps
+		#if FS_POSIX_DIR_SUPPORT 
+		&& FS_SemDirHandle && FS_SemDirOps
+		#endif
+		)
+	{
+		res = 0;
+	}
+	
+    return (res);
 }
 
 /*

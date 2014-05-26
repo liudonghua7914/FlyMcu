@@ -28,7 +28,6 @@ void ipcExchangeEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)
 	{
 		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
 	}
-	ipcClearEvent(enumWhatEvent);
 }
 
 void ipcStartEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)

@@ -337,6 +337,7 @@ void ipcFlyEEPROMInit(void)
 ***************************************************************************************************************************/
 void ipcEventProcFlyEEPROM(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length)
 {
+	BOOL bRes = TRUE;
 	switch(enumWhatEvent)
 	{
 		case EVENT_GLOBAL_MODULE_INIT:		ipcFlyEEPROMInit();				
@@ -345,6 +346,11 @@ void ipcEventProcFlyEEPROM(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t lengt
 		case EVENT_GLOBAL_FLY_EEPROM_CMD:	PutMessageToFrameBuff(0X00,p,length);
 																			
 		default:							break;
+	}
+	
+	if(bRes)
+	{
+		ipcClearEvent(enumWhatEvent);
 	}
 }
 /***************************************************************************************************************************

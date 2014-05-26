@@ -206,7 +206,10 @@ int main(void)
 	IntDisAll();
 	chipInit();
 	OSInit();
-	FS_Init();
+	if(FS_Init() < 0)
+	{
+		printf("\r\n FS_Init Fail");
+	}
 	TaskInit();
    	OSStart();
 	return 0;

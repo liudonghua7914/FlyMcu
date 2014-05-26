@@ -828,17 +828,8 @@ void FS_MMC_HW_X_Init(void)
 	
 	if(bRes)
 	{
-//		static FS_u8 buf[512];
-//		printf("\r\n FS MMC Init OK");
-//		FS__MMC_ReadSector(ID0,0000,buf);
-//		for(cnt = 0;cnt < 512;cnt++)
-//		{
-//			if(!(cnt % 16))
-//			{
-//				printf("\r\n %08x :",cnt);
-//			}
-//			printf("%x ",buf[cnt]);
-//		}
+		printf("\r\n FS MMC Init OK");
+		FS_MMC_HW_X_ClockCard(ID0,SSP_1MHz);
 	}
 }
 //3b 0 6 1c dc dc f7 0 0 0 9 cf 3c 0 0 0 

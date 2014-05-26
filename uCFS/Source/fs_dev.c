@@ -16,10 +16,10 @@
 
 
 
-static FS_u32   _FS_mmc_logicalstart[FS_MMC_MAXUNIT];     /* start of partition */
-static FS_u8     _FS_mmc_mbrbuffer[0x200];                 /* buffer for reading MBR */   
-static char     _FS_mmc_diskchange[FS_MMC_MAXUNIT];       /* signal flag for driver */
-static char     _FS_mmc_busycnt[FS_MMC_MAXUNIT];          /* counter for BSY LED on/off */
+static FS_u32   _FS_mmc_logicalstart[FS_MMC_MAXUNIT];     	/* start of partition */
+static FS_u8     _FS_mmc_mbrbuffer[0x200];                 	/* buffer for reading MBR */   
+static char     _FS_mmc_diskchange[FS_MMC_MAXUNIT];       	/* signal flag for driver */
+static char     _FS_mmc_busycnt[FS_MMC_MAXUNIT];          	/* counter for BSY LED on/off */
 
 /***********************************************************************
 **º¯ÊýÃû³Æ:	  FsDevStatus
