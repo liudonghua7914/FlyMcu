@@ -1474,9 +1474,10 @@ void FlySSP_Init(BYTE sspNum,uint32_t clk)
 {
 	LPC_SSP_TypeDef *SSPx;
 	SSP_CFG_Type ConfigStructInit;
+	PINSEL_CFG_Type PinCfg;
 	if(0X00 == sspNum)
 	{
-		PINSEL_CFG_Type PinCfg;
+		
 		PinCfg.Funcnum = 0X03;
 		PinCfg.OpenDrain = 0;
 		PinCfg.Pinmode = 0;
@@ -1613,7 +1614,45 @@ void FlySSP_ReadWrite(BYTE sspNum,BYTE RW,BYTE *p,UINT len)
 	OS_ENTER_CRITICAL();
 	SSP_ReadWrite(SSPx,&dataCfg,SSP_TRANSFER_POLLING);
 	OS_EXIT_CRITICAL();
-	
+}
+/***************************************************************************************************************************
+**函数名称:	 	FlyEthernetInit
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void FlyEthernetInit(void)
+{
+	PINSEL_CFG_Type PinCfg;
+	EMAC_CFG_Type EMAC_ConfigStruct;
+	BYTE MACBuf[] = {0x1E,0x30,0x6c,0xa2,0x45,0x5e};
+	PinCfg.Funcnum = 0X01;
+	PinCfg.OpenDrain = 0x00;
+	PinCfg.Pinmode = 0x00;
+	PinCfg.Portnum = 0x01;
+	PinCfg.Pinnum = 0;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 1;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 4;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 8;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 9;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 10;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 14;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 15;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 16;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 17;
+	PINSEL_ConfigPin(&PinCfg);
+	EMAC_ConfigStruct.Mode = EMAC_MODE_AUTO;
+	EMAC_ConfigStruct.pbEMAC_Addr = MACBuf;
+	EMAC_Init(&EMAC_ConfigStruct);
 }
 /***************************************************************************************************************************
 **函数名称:	 	TaskInit
