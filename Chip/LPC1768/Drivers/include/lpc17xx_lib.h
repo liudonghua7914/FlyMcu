@@ -21,6 +21,7 @@
 #include "lpc17xx_systick.h"
 #include "lpc17xx_spi.h"
 #include "lpc17xx_ssp.h"
+#include "lpc17xx_emac.h"
 //#include "lpc17xx_dac.h"
 //#include "lpc17xx_gpdma.h"
 //#include "lpc17xx_emac.h"
