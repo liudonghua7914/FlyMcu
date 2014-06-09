@@ -79,6 +79,30 @@ extern "C"
 #define EMAC_ETH_MAX_FLEN        1536        /**< Max. Ethernet Frame Size          */
 #define EMAC_TX_FRAME_TOUT       0x00100000  /**< Frame Transmit timeout count      */
 
+
+#if 1
+/* EMAC variables located in 16K Ethernet SRAM */
+//#define RX_DESC_BASE        0x7FE00000
+#define RX_DESC_BASE		0x20080000
+#define RX_STAT_BASE        (RX_DESC_BASE + EMAC_NUM_RX_FRAG*8)
+#define TX_DESC_BASE        (RX_STAT_BASE + EMAC_NUM_RX_FRAG*8)
+#define TX_STAT_BASE        (TX_DESC_BASE + EMAC_NUM_TX_FRAG*8)
+#define RX_BUF_BASE         (TX_STAT_BASE + EMAC_NUM_TX_FRAG*4)
+#define TX_BUF_BASE         (RX_BUF_BASE  + EMAC_NUM_RX_FRAG*EMAC_ETH_MAX_FLEN)
+
+/* RX and TX descriptor and status definitions. */
+#define RX_DESC_PACKET(i)   (*(unsigned int *)(RX_DESC_BASE   + 8*i))
+#define RX_DESC_CTRL(i)     (*(unsigned int *)(RX_DESC_BASE+4 + 8*i))
+#define RX_STAT_INFO(i)     (*(unsigned int *)(RX_STAT_BASE   + 8*i))
+#define RX_STAT_HASHCRC(i)  (*(unsigned int *)(RX_STAT_BASE+4 + 8*i))
+#define TX_DESC_PACKET(i)   (*(unsigned int *)(TX_DESC_BASE   + 8*i))
+#define TX_DESC_CTRL(i)     (*(unsigned int *)(TX_DESC_BASE+4 + 8*i))
+#define TX_STAT_INFO(i)     (*(unsigned int *)(TX_STAT_BASE   + 4*i))
+#define RX_BUF(i)           (RX_BUF_BASE + EMAC_ETH_MAX_FLEN*i)
+#define TX_BUF(i)           (TX_BUF_BASE + EMAC_ETH_MAX_FLEN*i)
+
+#endif
+
 /* --------------------- BIT DEFINITIONS -------------------------------------- */
 /*********************************************************************//**
  * Macro defines for MAC Configuration Register 1

@@ -80,7 +80,7 @@ void flySystemTask(void *arg)
 	while(1)
 	{
 		printf("\r\n flySystemTask");
-		checkIOStatus();
+		//checkIOStatus();
 		OSTimeDly(OS_TICKS_PER_SEC / 2);  
 	}
 }

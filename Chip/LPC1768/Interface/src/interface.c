@@ -1652,7 +1652,10 @@ void FlyEthernetInit(void)
 	PINSEL_ConfigPin(&PinCfg);
 	EMAC_ConfigStruct.Mode = EMAC_MODE_AUTO;
 	EMAC_ConfigStruct.pbEMAC_Addr = MACBuf;
-	EMAC_Init(&EMAC_ConfigStruct);
+	if(SUCCESS == EMAC_Init(&EMAC_ConfigStruct))
+	{
+		printf("\r\n SUCCESS");
+	}
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	TaskInit
@@ -1678,6 +1681,7 @@ void chipInit(void)
 	DebugInit();	
 	PrintWellcomeMsg();	
 	parameterInit();
+	FlyEthernetInit();
 	ipcExchangeInit();
 	printf("\r\nparameterInit");
 }

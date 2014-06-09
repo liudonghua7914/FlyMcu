@@ -19,12 +19,14 @@
 #include "flySystemTask.h"
 #include "demoDebugTask.h"
 #include "flyFileTask.h"
+#include "flyEthernetTask.h"
 #include "flyeepromTask.h"
 enum ePRIO
 {
 	PRIO_NON = 5,
 	PRIO_FLYSYSTEM,
 	PRIO_FLYFILE,
+	PRIO_FLYEHTERNET,
 	PRIO_FLYEEPROM,
 	PRIO_DEMO
 };

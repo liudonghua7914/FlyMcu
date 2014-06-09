@@ -106,6 +106,8 @@ static void rx_descr_init (void)
 {
 	/* Initialize Receive Descriptor and Status array. */
 	uint32_t i;
+#if 0	
+
 
 	for (i = 0; i < EMAC_NUM_RX_FRAG; i++) {
 		Rx_Desc[i].Packet  = (uint32_t)&rx_buf[i];
@@ -121,6 +123,26 @@ static void rx_descr_init (void)
 
 	/* Rx Descriptors Point to 0 */
 	LPC_EMAC->RxConsumeIndex  = 0;
+#else
+	
+	
+	for (i = 0; i < EMAC_NUM_RX_FRAG; i++) 
+	{
+		RX_DESC_PACKET(i)  = RX_BUF(i);
+		RX_DESC_CTRL(i)    = EMAC_RCTRL_INT | (EMAC_ETH_MAX_FLEN-1);
+		RX_STAT_INFO(i)    = 0;
+		RX_STAT_HASHCRC(i) = 0;
+	}
+
+	/* Set EMAC Receive Descriptor Registers. */
+	LPC_EMAC->RxDescriptor    = RX_DESC_BASE;
+	LPC_EMAC->RxStatus        = RX_STAT_BASE;
+	LPC_EMAC->RxDescriptorNumber = EMAC_NUM_RX_FRAG-1;
+
+	/* Rx Descriptors Point to 0 */
+	LPC_EMAC->RxConsumeIndex  = 0;
+
+#endif
 }
 
 
@@ -133,7 +155,7 @@ static void rx_descr_init (void)
 static void tx_descr_init (void) {
 	/* Initialize Transmit Descriptor and Status array. */
 	uint32_t i;
-
+#if 0
 	for (i = 0; i < EMAC_NUM_TX_FRAG; i++) {
 		Tx_Desc[i].Packet = (uint32_t)&tx_buf[i];
 		Tx_Desc[i].Ctrl   = 0;
@@ -147,6 +169,22 @@ static void tx_descr_init (void) {
 
 	/* Tx Descriptors Point to 0 */
 	LPC_EMAC->TxProduceIndex  = 0;
+#else
+	for (i = 0; i < EMAC_NUM_TX_FRAG; i++) 
+	{
+		TX_DESC_PACKET(i) = TX_BUF(i);
+		TX_DESC_CTRL(i)   = (1<<31) | (1<<30) | (1<<29) | (1<<28) | (1<<26) | (EMAC_ETH_MAX_FLEN-1);
+		TX_STAT_INFO(i)   = 0;
+	}
+
+	/* Set EMAC Transmit Descriptor Registers. */
+	LPC_EMAC->TxDescriptor    = TX_DESC_BASE;
+	LPC_EMAC->TxStatus        = TX_STAT_BASE;
+	LPC_EMAC->TxDescriptorNumber = EMAC_NUM_TX_FRAG-1;
+
+	/* Tx Descriptors Point to 0 */
+	LPC_EMAC->TxProduceIndex  = 0;
+#endif
 }
 
 
@@ -761,15 +799,17 @@ void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
  **********************************************************************/
 void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 {
-	uint32_t idx, len;
+	uint32_t idx, len,tmp;
 	uint32_t *dp, *sp;
 
 	idx = LPC_EMAC->RxConsumeIndex;
 	dp = (uint32_t *)pDataStruct->pbDataBuf;
 	sp = (uint32_t *)Rx_Desc[idx].Packet;
-
-	if (pDataStruct->pbDataBuf != NULL) {
-		for (len = (pDataStruct->ulDataLen + 3) >> 2; len; len--) {
+	tmp = (pDataStruct->ulDataLen + 3) >> 2;
+	if (pDataStruct->pbDataBuf != NULL) 
+	{
+		for (len = tmp ;len; len--) 
+		{
 			*dp++ = *sp++;
 		}
 	}
