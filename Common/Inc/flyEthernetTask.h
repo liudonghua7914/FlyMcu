@@ -49,6 +49,8 @@ FLYETHERNET_GLOBAL T_FLYEHTERNET_INFO flyEhternetInfo;
 FLYETHERNET_GLOBAL UINT GstkFlyEthernet[FLYETHERNET_TASK_START_STK_SIZE];	
 FLYETHERNET_GLOBAL void FlylyEthernetCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
+
+FLYETHERNET_GLOBAL void WriteEthernetData(BYTE *p,UINT len);
 #endif	
 
 

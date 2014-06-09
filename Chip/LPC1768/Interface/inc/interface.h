@@ -37,6 +37,15 @@
 
 #define	 DEBUG_PORT_SELECT		0
 
+
+#define	MAC0	0x1E
+#define	MAC1	0x30
+#define	MAC2	0x6c
+#define	MAC3	0xa2
+#define	MAC4	0x45
+#define	MAC5	0x5e
+
+
 #if(0 == DEBUG_PORT_SELECT)	
 	#define		FUNCNUM		0X01
 	#define		PORTNUM		0

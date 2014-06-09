@@ -1625,7 +1625,7 @@ void FlyEthernetInit(void)
 {
 	PINSEL_CFG_Type PinCfg;
 	EMAC_CFG_Type EMAC_ConfigStruct;
-	BYTE MACBuf[] = {0x1E,0x30,0x6c,0xa2,0x45,0x5e};
+	BYTE MACBuf[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
 	PinCfg.Funcnum = 0X01;
 	PinCfg.OpenDrain = 0x00;
 	PinCfg.Pinmode = 0x00;

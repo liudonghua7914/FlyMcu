@@ -721,6 +721,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Common\Src\flySystemTask.c</FilePath>
             </File>
+            <File>
+              <FileName>flyEthernetTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Common\Src\flyEthernetTask.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
