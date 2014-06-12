@@ -23,6 +23,8 @@
 #define ICMP_IRQ 15    /* information request */
 #define ICMP_IR  16    /* information reply */
 
+
+#define ERR_OK  (0)
 #define	ERR		(-1)
 #define	NOERR	(0)
 
@@ -36,6 +38,9 @@
 
 #define SIZEOF_ETH_HDR (14)
 
+
+
+
 #ifndef		_FLYETHERNETGOABLE_
 	#define		FLYETHERNET_GLOBAL		extern
 #else
@@ -43,6 +48,14 @@
 
 #endif
 
+typedef enum {
+  PBUF_RAM, /* pbuf data is stored in RAM */
+  PBUF_ROM, /* pbuf data is stored in ROM */
+  PBUF_REF, /* pbuf comes from the pbuf pool */
+  PBUF_POOL /* pbuf payload refers to RAM */
+} pbuf_type;
+
+	
 struct eth_addr 
 {
   BYTE addr[6];
@@ -69,10 +82,9 @@ struct etharp_hdr
 };
 
 
-typedef struct
+struct ip_hdr
 {
-	BYTE v_hl;
-	BYTE tos;
+	UINT16 v_hl_tos;
 	UINT16 len;
 	UINT16 id;
 	UINT16 offset;
@@ -81,7 +93,7 @@ typedef struct
 	UINT16 chksum;
 	BYTE srcIP[4];
 	BYTE dscIP[4];
-}T_IP_HREAD_INFO;
+};
 
 
 typedef struct
@@ -132,7 +144,8 @@ typedef struct
 	BYTE currentDesIP[4];
 	BYTE currentSrcMac[6];
 	BYTE currentDesMac[6];
-	struct pbuf *pbuf;
+	struct pbuf pbuf;
+	void *playload;
 	struct netif mynetif;
 	
 }T_FLYEHTERNET_INFO;	
