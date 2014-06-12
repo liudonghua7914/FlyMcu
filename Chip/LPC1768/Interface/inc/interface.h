@@ -43,7 +43,7 @@
 #define	MAC2	0x6c
 #define	MAC3	0xa2
 #define	MAC4	0x45
-#define	MAC5	0x5e
+#define	MAC5	0x5f
 
 
 #if(0 == DEBUG_PORT_SELECT)	
