@@ -5,7 +5,7 @@
 #include "includes.h"
 
 
-#define  		FLYETHERNET_TASK_START_STK_SIZE          100
+#define  		FLYETHERNET_TASK_START_STK_SIZE          150
 #define 		RECSIZE			256
 
 #define PP_HTONS(x) ((((x) & 0xff) << 8) | (((x) & 0xff00) >> 8))
@@ -24,9 +24,30 @@
 #define ICMP_IR  16    /* information reply */
 
 
-#define ERR_OK  (0)
-#define	ERR		(-1)
-#define	NOERR	(0)
+#define ICMP_TTL       (255)
+
+
+#define ERR_OK          0    /* No error, everything OK. */
+#define ERR_MEM        -1    /* Out of memory error.     */
+#define ERR_BUF        -2    /* Buffer error.            */
+#define ERR_TIMEOUT    -3    /* Timeout.                 */
+#define ERR_RTE        -4    /* Routing problem.         */
+#define ERR_INPROGRESS -5    /* Operation in progress    */
+#define ERR_VAL        -6    /* Illegal value.           */
+#define ERR_WOULDBLOCK -7    /* Operation would block.   */
+#define ERR_USE        -8    /* Address in use.          */
+#define ERR_ISCONN     -9    /* Already connected.       */
+
+#define ERR_IS_FATAL(e) ((e) < ERR_ISCONN)
+
+#define ERR_ABRT       -10   /* Connection aborted.      */
+#define ERR_RST        -11   /* Connection reset.        */
+#define ERR_CLSD       -12   /* Connection closed.       */
+#define ERR_CONN       -13   /* Not connected.           */
+
+#define ERR_ARG        -14   /* Illegal argument.        */
+
+#define ERR_IF         -15   /* Low-level netif error    */
 
 
 #define ETHTYPE_ARP       0x0806U
@@ -36,10 +57,21 @@
 #define ETHTYPE_PPPOE     0x8864U  /* PPP Over Ethernet Session Stage */
 
 
+
+#define	MAC0	0x1E
+#define	MAC1	0x30
+#define	MAC2	0x6c
+#define	MAC3	0xa2
+#define	MAC4	0x45
+#define	MAC5	0x5E
+
+#define FOLD_U32T(u)          (((u) >> 16) + ((u) & 0x0000ffffUL))
+#define SWAP_BYTES_IN_WORD(w) (((w) & 0xff) << 8) | (((w) & 0xff00) >> 8)
+
 #define SIZEOF_ETH_HDR (14)
+#define PBUF_IP_HLEN   (20)
 
-
-
+#define IP_HDRINCL  NULL
 
 #ifndef		_FLYETHERNETGOABLE_
 	#define		FLYETHERNET_GLOBAL		extern
@@ -48,23 +80,46 @@
 
 #endif
 
-typedef enum {
-  PBUF_RAM, /* pbuf data is stored in RAM */
-  PBUF_ROM, /* pbuf data is stored in ROM */
-  PBUF_REF, /* pbuf comes from the pbuf pool */
-  PBUF_POOL /* pbuf payload refers to RAM */
-} pbuf_type;
 
-	
+
+
+
 struct eth_addr 
 {
   BYTE addr[6];
 };	
+
+struct ip_addr 
+{
+	BYTE addr[4];
+};
+
+
+typedef struct ip_addr ip_addr_t;
+typedef int err_t;	
+
+typedef enum 
+{
+	PBUF_RAM, /* pbuf data is stored in RAM */
+	PBUF_ROM, /* pbuf data is stored in ROM */
+	PBUF_REF, /* pbuf comes from the pbuf pool */
+	PBUF_POOL /* pbuf payload refers to RAM */
+}pbuf_type;
+
 	
+struct icmp_echo_hdr 
+{
+	BYTE type;
+	BYTE icode;
+	UINT16 chksum;
+	UINT16 id;
+	UINT16 seqno;
+};
+
 struct eth_hdr
 {
-	BYTE DesAddr[6];
-	BYTE SrcAddr[6];
+	struct eth_addr DesMac;
+	struct eth_addr SrcMac;
 	UINT16 Type;
 };
 
@@ -91,8 +146,8 @@ struct ip_hdr
 	BYTE ttl;
 	BYTE proto;
 	UINT16 chksum;
-	BYTE srcIP[4];
-	BYTE dscIP[4];
+	ip_addr_t srcIP;
+	ip_addr_t dscIP;
 };
 
 
@@ -117,13 +172,6 @@ struct pbuf
 	UINT16 ref;
 };
 
-struct ip_addr 
-{
-	BYTE  addr[4];
-};
-
-
-typedef struct ip_addr ip_addr_t;
 
 
 struct netif 
@@ -133,17 +181,17 @@ struct netif
 	ip_addr_t ip_addr;
 	ip_addr_t netmask;
 	ip_addr_t gw;
-	BYTE hwaddr[6];
+	struct eth_addr hwaddr;
 };
 
 typedef struct
 {
 	BYTE xxx;
 	BYTE recBuf[RECSIZE];
-	BYTE currentSrcIP[4];
-	BYTE currentDesIP[4];
-	BYTE currentSrcMac[6];
-	BYTE currentDesMac[6];
+	ip_addr_t currentSrcIP;
+	ip_addr_t currentDesIP;
+	struct eth_addr currentSrcMac;
+	struct eth_addr currentDesMac;
 	struct pbuf pbuf;
 	void *playload;
 	struct netif mynetif;
