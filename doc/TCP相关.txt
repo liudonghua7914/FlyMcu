@@ -1,0 +1,86 @@
+
+pcb链表:
+	1.处于侦听状态的链表 tcp_listen_pcbs -> 链表用来连接处于 LISTEN 状态的控制块;
+	2.处于稳定状态的链表 tcp_active_pcbs -> 链表用来连接处于 TCP状态转换图中其他所有状态的控制块;
+	3.已经绑定完毕的PCB链表 tcp_bound_pcbs -> 链表用来连接新创建的控制块，可以认为新建的控制块处于 closed状态;
+	4.处于TIME-WAIT状态的PCB链表 tcp_tw_pcbs -> 链表用来连接处于TIME_WAIT状态的控制块;
+	
+	   如果遍历完这些链表后，都没有找到相应的<IP 地址、端口>对，则说明该<IP 地址、端口>
+	对可用，则可进行上面说的赋值操作，最后，函数将这个 PCB 加入绑定完毕的 PCB 链表
+	tcp_bound_pcbs。
+
+
+tcp_input:
+
+	1. 获取数据头信息
+	iphdr = (struct ip_hdr *)p->payload;
+	tcphdr = (struct tcp_hdr *)((u8_t *)p->payload + IPH_HL(iphdr) * 4);
+	
+	2.将p指针向后移动 IPH_HL(iphdr) * 4个字节位置
+	 if (pbuf_header(p, -((s16_t)(IPH_HL(iphdr) * 4))) || (p->tot_len < sizeof(struct tcp_hdr)))
+	 {
+		xxx
+	 }
+	 
+	3.将p指针指向TCP数据项,指针移动hdrlen * 4个字节位置
+	 hdrlen = TCPH_HDRLEN(tcphdr);
+	 if(pbuf_header(p, -(hdrlen * 4))
+	 {
+		xxx
+	 }
+	 
+	4.大小端模式转换
+	tcphdr->src = ntohs(tcphdr->src);
+	tcphdr->dest = ntohs(tcphdr->dest);
+	seqno = tcphdr->seqno = ntohl(tcphdr->seqno);
+	ackno = tcphdr->ackno = ntohl(tcphdr->ackno);
+	tcphdr->wnd = ntohs(tcphdr->wnd);
+
+	flags = TCPH_FLAGS(tcphdr);
+	tcplen = p->tot_len + ((flags & (TCP_FIN | TCP_SYN)) ? 1 : 0);
+	
+	5.遍历真个tcp_active_pcbs指向的链表
+	//tcp_active_pcbs = 自己初始化时定义的一个tcp_pcb结构体
+	for(pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next) 
+	{
+		if (pcb->remote_port == tcphdr->src &&
+		pcb->local_port == tcphdr->dest &&
+		ip_addr_cmp(&(pcb->remote_ip), &current_iphdr_src) &&
+		ip_addr_cmp(&(pcb->local_ip), &current_iphdr_dest)) 
+		{
+			//源端口号 = remote_port
+			//目的端口号 = local_port
+			//当前源 IP = pcb->remote_ip
+			//当前目标 IP = pcb->local_ip
+			
+			if (prev != NULL) 
+			{
+				prev->next = pcb->next;
+				pcb->next = tcp_active_pcbs;
+				tcp_active_pcbs = pcb;
+			}	
+			else
+			{
+			
+			}
+		}
+		prev = pcb;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
