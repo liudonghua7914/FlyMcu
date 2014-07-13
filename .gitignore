@@ -1,7 +1,7 @@
-/Chip/LPC1768/List
-/Chip/LPC1768/Obj
+/Chip/LPC1768/List/
+/Chip/LPC1768/Obj/
 
-/Chip/LPC1768/*.*.bak
+/Chip/LPC1768/*.bak
 /Chip/LPC1768/*.uvopt
 /Chip/LPC1768/*.lnp
 /Chip/LPC1768/*.map
