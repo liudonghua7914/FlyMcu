@@ -27,7 +27,7 @@
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_MEM_PART           1   /* Max. number of memory partitions ...                         */
                                        /* ... MUST be > 0                                              */
-#define OS_MAX_QS                 1   /* Max. number of queue control blocks in your application ...  */
+#define OS_MAX_QS                 2   /* Max. number of queue control blocks in your application ...  */
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_TASKS              15    /* Max. number of tasks in your application ...                 */
                                        /* ... MUST be >= 2                                             */
@@ -53,7 +53,7 @@
 
 
                                        /* -------------------- MESSAGE MAILBOXES --------------------- */
-#define OS_MBOX_EN                0    /* Enable (1) or Disable (0) code generation for MAILBOXES      */
+#define OS_MBOX_EN                1    /* Enable (1) or Disable (0) code generation for MAILBOXES      */
 #define OS_MBOX_ACCEPT_EN         1    /*     Include code for OSMboxAccept()                          */
 #define OS_MBOX_DEL_EN            1    /*     Include code for OSMboxDel()                             */
 #define OS_MBOX_POST_EN           1    /*     Include code for OSMboxPost()                            */
@@ -74,7 +74,7 @@
 
 
                                        /* ---------------------- MESSAGE QUEUES ---------------------- */
-#define OS_Q_EN                   0    /* Enable (1) or Disable (0) code generation for QUEUES         */
+#define OS_Q_EN                   1    /* Enable (1) or Disable (0) code generation for QUEUES         */
 #define OS_Q_ACCEPT_EN            1    /*     Include code for OSQAccept()                             */
 #define OS_Q_DEL_EN               1    /*     Include code for OSQDel()                                */
 #define OS_Q_FLUSH_EN             1    /*     Include code for OSQFlush()                              */

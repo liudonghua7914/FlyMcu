@@ -31,6 +31,7 @@ typedef unsigned int u32_t;
 typedef signed int s32_t;
 typedef uintptr_t mem_ptr_t;
 
+typedef unsigned int sys_port_t;
 
 /*
 	 Compiler hints for packing lwip's structures
@@ -61,24 +62,7 @@ typedef uintptr_t mem_ptr_t;
 									}while (0)
 
 
-									
-
-
-
-
-#ifndef SYS_ARCH_PROTECT
-									
-#if SYS_LIGHTWEIGHT_PROT										
-	#define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev	
-	#define SYS_ARCH_PROTECT(lev) lev = sys_arch_protect()
-	#define SYS_ARCH_UNPROTECT(lev) sys_arch_unprotect(lev)									
-#else
-	#define SYS_ARCH_DECL_PROTECT(lev)
-	#define SYS_ARCH_PROTECT(lev)
-	#define SYS_ARCH_UNPROTECT(lev)	
-#endif		
-									
-#endif				
+											
 
 
 

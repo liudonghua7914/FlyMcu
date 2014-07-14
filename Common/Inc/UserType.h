@@ -23,7 +23,7 @@
 #include "flyeepromTask.h"
 enum ePRIO
 {
-	PRIO_NON = 5,
+	PRIO_NON = 8,
 	PRIO_FLYSYSTEM,
 	PRIO_FLYFILE,
 	PRIO_FLYEHTERNET,
