@@ -1,6 +1,8 @@
 #ifndef 	___FILETHERNET_H__
 #define		___FILETHERNET_H__
 
+
+#if 0
 #include "def.h"
 #include "includes.h"
 
@@ -203,6 +205,7 @@ FLYETHERNET_GLOBAL void FlylyEthernetCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
 
 FLYETHERNET_GLOBAL void WriteEthernetData(BYTE *p,UINT len);
+#endif
 #endif	
 
 

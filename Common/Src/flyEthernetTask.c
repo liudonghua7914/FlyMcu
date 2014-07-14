@@ -1,5 +1,5 @@
 #define		_FLYETHERNETGOABLE_
-
+#if 0
 #include "config.h"
 #include "lpc17xx_lib.h"
 #include "includes.h"
@@ -843,3 +843,4 @@ void FlylyEthernetCreate(void)
 		printf("\r\n Res = %d",Res);
 	}
 }
+#endif
