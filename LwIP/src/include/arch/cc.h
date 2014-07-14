@@ -18,6 +18,8 @@
 #include <string.h>
 
 
+#define BYTE_ORDER  LITTLE_ENDIAN
+
 /*
 	Typedefs for the types used by lwip
 */

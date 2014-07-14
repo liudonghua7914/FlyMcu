@@ -357,7 +357,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\Drivers\include;.\Interface\inc;..\..\Common\Inc;..\..\uCOS-II\Ports;..\..\uCFS\Inc;..\..\LwIP\src\include\arch;..\..\LwIP\src\include\ipv4\lwip;..\..\LwIP\src\include\ipv6\lwip;..\..\LwIP\src\include\lwip;..\..\LwIP\src\include\netif</IncludePath>
+              <IncludePath>.\Drivers\include;.\Interface\inc;..\..\Common\Inc;..\..\uCOS-II\Ports;..\..\uCFS\Inc;..\..\LwIP\src\include\arch;..\..\LwIP\src\include\lwip;..\..\LwIP\src\include\netif;..\..\LwIP\src\include;..\..\LwIP\src\include\ipv4;..\..\LwIP\src\include\ipv6</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

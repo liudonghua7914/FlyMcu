@@ -1623,9 +1623,11 @@ void FlySSP_ReadWrite(BYTE sspNum,BYTE RW,BYTE *p,UINT len)
 ***************************************************************************************************************************/
 void FlyEthernetInit(void)
 {
+#if 1
 	PINSEL_CFG_Type PinCfg;
 	EMAC_CFG_Type EMAC_ConfigStruct;
-	BYTE MACBuf[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
+	//BYTE MACBuf[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
+	BYTE MACBuf[] = {0X1e,0x30,0x6c,0xa2,0x45,0x5E};
 	PinCfg.Funcnum = 0X01;
 	PinCfg.OpenDrain = 0x00;
 	PinCfg.Pinmode = 0x00;
@@ -1656,6 +1658,8 @@ void FlyEthernetInit(void)
 	{
 		printf("\r\n SUCCESS");
 	}
+
+#endif
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	TaskInit

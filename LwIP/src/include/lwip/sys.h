@@ -104,7 +104,6 @@ typedef void (*lwip_thread_fn)(void *arg);
 #define sys_mutex_free(mutex)         sys_sem_free(mutex)
 #define sys_mutex_valid(mutex)        sys_sem_valid(mutex)
 #define sys_mutex_set_invalid(mutex)  sys_sem_set_invalid(mutex)
-
 #else /* LWIP_COMPAT_MUTEX */
 
 /** Create a new mutex
