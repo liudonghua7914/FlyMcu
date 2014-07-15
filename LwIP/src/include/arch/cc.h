@@ -54,8 +54,7 @@ typedef unsigned int sys_port_t;
 /*
 	Platform specific diagnostic output
 */
-#define LWIP_PLATFORM_DIAG(x)   	do{                \
-									}while (0)
+#define LWIP_PLATFORM_DIAG(x)   	printf x
 
    								 
 #define LWIP_PLATFORM_ASSERT(x) 	do{                \

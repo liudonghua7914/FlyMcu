@@ -41,6 +41,9 @@
  * - 2 serious
  * - 3 severe
  */
+ 
+#define	LWIP_DEBUG
+ 
 #define LWIP_DBG_LEVEL_ALL     0x00
 #define LWIP_DBG_LEVEL_OFF     LWIP_DBG_LEVEL_ALL /* compatibility define only */
 #define LWIP_DBG_LEVEL_WARNING 0x01 /* bad checksums, dropped packets, ... */
@@ -79,6 +82,9 @@
 /** print debug message only if debug message type is enabled...
  *  AND is of correct type AND is at least LWIP_DBG_LEVEL
  */
+  
+
+  
 #define LWIP_DEBUGF(debug, message) do { \
                                if ( \
                                    ((debug) & LWIP_DBG_ON) && \
