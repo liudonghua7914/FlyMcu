@@ -18,6 +18,8 @@
 #define		LWIP_THREAD_TASK_MAX 		3
 #define		LWIP_THREAD_TASK_STACK		100
 
+#define 	MAX_QUEUE_ENTRIES			100
+
 #define sys_arch_mbox_tryfetch(mbox,msg)  sys_arch_mbox_fetch(mbox,msg,1)
 
 typedef OS_EVENT sys_sem_t;

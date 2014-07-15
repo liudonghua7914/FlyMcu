@@ -53,4 +53,24 @@
 /* Minimal changes to opt.h required for etharp unit tests: */
 #define ETHARP_SUPPORT_STATIC_ENTRIES   1
 
+
+/**
+ * TCPIP_MBOX_SIZE: The mailbox size for the tcpip thread messages
+ * The queue size value itself is platform-dependent, but is passed to
+ * sys_mbox_new() when tcpip_init is called.
+ */
+#undef TCPIP_MBOX_SIZE
+#define TCPIP_MBOX_SIZE         MAX_QUEUE_ENTRIES
+
+
+/**
+ * DEFAULT_TCP_RECVMBOX_SIZE: The mailbox size for the incoming packets on a
+ * NETCONN_TCP. The queue size value itself is platform-dependent, but is passed
+ * to sys_mbox_new() when the recvmbox is created.
+ */
+#undef DEFAULT_TCP_RECVMBOX_SIZE
+#define DEFAULT_TCP_RECVMBOX_SIZE       MAX_QUEUE_ENTRIES
+
+
+
 #endif /* __LWIPOPTS_H__ */

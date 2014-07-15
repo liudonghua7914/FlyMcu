@@ -4,8 +4,10 @@
 #include "sys_arch.h"
 #include "sys.h"
 
-#define Size	100
-static void *ArrayOfMsg[Size];
+
+
+static void *ArrayOfMsg[MAX_QUEUE_ENTRIES];
+
 OS_STK LWIP_THREAD_TASK[LWIP_THREAD_TASK_MAX][LWIP_THREAD_TASK_STACK];
 u8_t cur_prio = 0;
 /***************************************************************************************************************************
@@ -103,7 +105,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
 	err_t err = ERR_VAL;
 	mbox = NULL;
-	mbox = OSQCreate(&ArrayOfMsg[0],Size);
+	mbox = OSQCreate(&ArrayOfMsg[0],size);
 	if(NULL != err)
 	{
 		err = ERR_OK;
@@ -129,7 +131,10 @@ void sys_mbox_free(sys_mbox_t *mbox)
 ***************************************************************************************************************************/
 void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
-	OSQPost(mbox,msg);
+	if(NULL != msg)
+	{
+		OSQPost(mbox,msg);
+	}
 }
 /***************************************************************************************************************************
 **函数名称:	 	sys_mbox_trypost
@@ -139,8 +144,16 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 ***************************************************************************************************************************/
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 {
-	err_t err;
-	err = OSMboxPost(mbox,msg);
+	err_t err = ERR_OK;
+
+	if(NULL != msg)
+	{
+		err = OSMboxPost(mbox,msg);
+		if(OS_NO_ERR != err)
+		{
+			err = ERR_MEM;
+		}
+	}
 	return err;
 }
 /***************************************************************************************************************************
@@ -152,8 +165,47 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 {
 	INT8U err;
-	*msg = OSQPend(mbox,timeout,&err);
-	return err;
+	u32_t ucos_timeout,timeout_new;
+	void *temp = NULL;
+	
+	if(timeout != 0)
+	{
+		ucos_timeout = (timeout * OS_TICKS_PER_SEC) / 1000;
+		if(ucos_timeout <= 1)
+		{
+			ucos_timeout = 1;
+		}
+	}
+	else
+	{
+		ucos_timeout = 0;
+	}
+	
+	timeout = OSTimeGet();
+	temp = OSQPend(mbox,(u16_t)ucos_timeout,&err);
+	if(msg != NULL)
+	{
+		*msg = temp;
+	}
+	
+	if(OS_TIMEOUT == err)
+	{
+		timeout = SYS_ARCH_TIMEOUT;
+	}
+	else
+	{
+		timeout_new = OSTimeGet();
+		if(timeout_new > timeout )
+		{
+			timeout_new = timeout_new - timeout;
+		}
+		else
+		{
+			timeout_new = 0XFFFFFFFF - timeout + timeout_new;
+		}
+		timeout = timeout_new * 1000 / OS_TICKS_PER_SEC + 1;
+	}
+	return timeout;
 }	
 /***************************************************************************************************************************
 **函数名称:	 	sys_mbox_valid
