@@ -197,7 +197,16 @@ void Delayms(uint32_t Time)
 	ResetUserTimer(&t);	
 	while(ReadUserTimer(&t) < Time);
 }
-
+/***************************************************************************************************************************
+**函数名称:	 	ENET_IRQHandler
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ENET_IRQHandler(void)
+{
+	
+}
 /***************************************************************************************************************************
 **函数名称:	 	EINT3_IRQHandler
 **函数功能:	 	
@@ -378,10 +387,7 @@ void CAN_IRQHandler(void)
 	{
 		CAN_ReceiveMsg(LPC_CAN1,&LPC_RxCanMsg);
 		CANLPCRxMsg2RxStdMsg(&LPC_RxCanMsg,&RxData);
-		//FIFO_PUT_ONE_INT(CarRxFifo,RxData);
 	}
-	
-
 }
 /***************************************************************************************************************************
 **函数名称:	 	WDT_IRQHandler
@@ -417,9 +423,7 @@ void UART1_IRQHandler(void)
 	}
 	if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI))
 	{
-		UART_Receive((LPC_UART_TypeDef *)LPC_UART1, &Temp, 1, NONE_BLOCKING);
-		//FIFO_PUT_ONE_INT(UartRxFifo,Temp);	
-		
+		UART_Receive((LPC_UART_TypeDef *)LPC_UART1, &Temp, 1, NONE_BLOCKING);		
 	}
 	interfaceInfo.UartCount++;
 }
@@ -448,7 +452,6 @@ void UART2_IRQHandler(void)
 	if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI))
 	{
 		UART_Receive((LPC_UART_TypeDef *)LPC_UART2, &Temp, 1, NONE_BLOCKING);
-		//FIFO_PUT_ONE_INT(Uart2RxCarFifo,Temp);	
 	}
 }
 /***************************************************************************************************************************
@@ -476,7 +479,6 @@ void UART3_IRQHandler(void)
 	if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI))
 	{
 		UART_Receive((LPC_UART_TypeDef *)LPC_UART3, &Temp, 1, NONE_BLOCKING);
-		//FIFO_PUT_ONE_INT(Uart3RxCarFifo,Temp);	
 	}
 }
 /***************************************************************************************************************************
@@ -531,8 +533,6 @@ int fputc(int ch, FILE *f)
 ***************************************************************************************************************************/
 void I2CTickDelay(void)
 {
-	//Delayus(TIME_2US);
-//	Delayms(T_1MS);
 	uint32_t Count = 0;
 	for(Count = 0;Count < 10000;Count++)
 	{
@@ -1626,8 +1626,7 @@ void FlyEthernetInit(void)
 #if 1
 	PINSEL_CFG_Type PinCfg;
 	EMAC_CFG_Type EMAC_ConfigStruct;
-	//BYTE MACBuf[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
-	BYTE MACBuf[] = {0X1e,0x30,0x6c,0xa2,0x45,0x5E};
+	BYTE MACBuf[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
 	PinCfg.Funcnum = 0X01;
 	PinCfg.OpenDrain = 0x00;
 	PinCfg.Pinmode = 0x00;
@@ -1658,7 +1657,6 @@ void FlyEthernetInit(void)
 	{
 		printf("\r\n SUCCESS");
 	}
-
 #endif
 }
 /***************************************************************************************************************************

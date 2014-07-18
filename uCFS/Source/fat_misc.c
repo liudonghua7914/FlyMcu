@@ -67,7 +67,7 @@ None.
 
 typedef struct {
   int status;
-  char memory[FS_FAT_SEC_SIZE];
+  char memory[FS_FAT_SEC_SIZE];//
 } _FS_FAT_block_type;
 
 

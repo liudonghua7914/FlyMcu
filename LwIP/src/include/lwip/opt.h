@@ -179,7 +179,7 @@
  * To use this, MEMP_USE_CUSTOM_POOLS also has to be enabled.
  */
 #ifndef MEM_USE_POOLS
-#define MEM_USE_POOLS                   0
+#define MEM_USE_POOLS                  0
 #endif
 
 /**
@@ -570,7 +570,7 @@
  * via IP_FRAG.
  */
 #ifndef IP_REASSEMBLY
-#define IP_REASSEMBLY                   1
+#define IP_REASSEMBLY                   0
 #endif
 
 /**
@@ -579,7 +579,7 @@
  * controlled via IP_REASSEMBLY.
  */
 #ifndef IP_FRAG
-#define IP_FRAG                         1
+#define IP_FRAG                         0
 #endif
 
 /**
@@ -707,7 +707,7 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #ifndef LWIP_RAW
-#define LWIP_RAW                        1
+#define LWIP_RAW                        0
 #endif
 
 /**

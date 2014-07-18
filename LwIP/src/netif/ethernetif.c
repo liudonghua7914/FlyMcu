@@ -45,7 +45,7 @@
 
 #include "lwip/opt.h"
 
-#if 0 /* don't build, this is only a skeleton, see previous comment */
+#if 1 /* don't build, this is only a skeleton, see previous comment */
 
 #include "lwip/def.h"
 #include "lwip/mem.h"
@@ -55,7 +55,9 @@
 #include "lwip/ethip6.h"
 #include "netif/etharp.h"
 #include "netif/ppp_oe.h"
+#include "lwip/Netif.h"
 
+#include "UserType.h"
 /* Define those to better describe your network interface. */
 #define IFNAME0 'e'
 #define IFNAME1 'n'
@@ -72,7 +74,7 @@ struct ethernetif {
 };
 
 /* Forward declarations. */
-static void  ethernetif_input(struct netif *netif);
+
 
 /**
  * In this function, the hardware should be initialized.
@@ -90,9 +92,12 @@ low_level_init(struct netif *netif)
   netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
   /* set MAC hardware address */
-  netif->hwaddr[0] = ;
-  ...
-  netif->hwaddr[5] = ;
+  netif->hwaddr[0] = MAC0;
+  netif->hwaddr[1] = MAC1;
+  netif->hwaddr[2] = MAC2;	
+  netif->hwaddr[3] = MAC3;
+  netif->hwaddr[4] = MAC4;
+  netif->hwaddr[5] = MAC5;
 
   /* maximum transfer unit */
   netif->mtu = 1500;
@@ -125,21 +130,22 @@ low_level_output(struct netif *netif, struct pbuf *p)
 {
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *q;
-
-  initiate transfer();
+  unsigned char *tx_buffer;
+  unsigned int error = 0;
+  uint32_t len = 0; 	
+  //initiate transfer();
   
+  //tx_buffer = (unsigned char *) TX_DESC_PACKET(LPC_EMAC->TxProduceIndex);	
+	
 #if ETH_PAD_SIZE
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
 
   for(q = p; q != NULL; q = q->next) {
-    /* Send the data from the pbuf to the interface, one pbuf at a
-       time. The size of the data in each pbuf is kept in the ->len
-       variable. */
-    send data from(q->payload, q->len);
+	
   }
 
-  signal that packet should be sent();
+ // signal that packet should be sent();
 
 #if ETH_PAD_SIZE
   pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -161,10 +167,11 @@ low_level_output(struct netif *netif, struct pbuf *p)
 static struct pbuf *
 low_level_input(struct netif *netif)
 {
+
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *p, *q;
   u16_t len;
-
+#if 0	
   /* Obtain the size of the packet and put it into the "len"
      variable. */
   len = ;
@@ -207,7 +214,7 @@ low_level_input(struct netif *netif)
     LINK_STATS_INC(link.memerr);
     LINK_STATS_INC(link.drop);
   }
-
+#endif
   return p;  
 }
 
@@ -220,13 +227,13 @@ low_level_input(struct netif *netif)
  *
  * @param netif the lwip network interface structure for this ethernetif
  */
-static void
+void
 ethernetif_input(struct netif *netif)
 {
   struct ethernetif *ethernetif;
   struct eth_hdr *ethhdr;
   struct pbuf *p;
-
+#if 1
   ethernetif = netif->state;
 
   /* move received packet into a new pbuf */
@@ -259,6 +266,7 @@ ethernetif_input(struct netif *netif)
     p = NULL;
     break;
   }
+  #endif
 }
 
 /**
