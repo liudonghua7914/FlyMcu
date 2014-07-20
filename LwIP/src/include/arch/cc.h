@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "interface.h"
 
 #define BYTE_ORDER  LITTLE_ENDIAN
 
@@ -54,7 +55,7 @@ typedef unsigned int sys_port_t;
 /*
 	Platform specific diagnostic output
 */
-#define LWIP_PLATFORM_DIAG(x)   	printf x
+#define LWIP_PLATFORM_DIAG(x)   	printf_w x
 
    								 
 #define LWIP_PLATFORM_ASSERT(x) 	do{                \

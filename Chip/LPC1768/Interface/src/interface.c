@@ -526,6 +526,36 @@ int fputc(int ch, FILE *f)
 	return (0);
 }
 /***************************************************************************************************************************
+**函数名称:	 	printf_w
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void printf_w(const char *format, ...)
+{
+	int n = 0,i = 0;
+	va_list args; 
+	va_start(args, format);
+	n = vsprintf(interfaceInfo.DebugMsg,format,args);
+	if('\n' == interfaceInfo.DebugMsg[n - 1])
+	{
+		interfaceInfo.DebugMsg[n - 1] = '\r';
+		interfaceInfo.DebugMsg[n] = '\n';
+		n += 1;
+	}
+//	else
+//	{
+//		interfaceInfo.DebugMsg[n] = '\r';
+//		interfaceInfo.DebugMsg[n+1] = '\n';
+//		n += 2;
+//	}
+	va_end(args);
+	for(i = 0;i < n;i++)
+	{
+		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugMsg[i], 1, BLOCKING);
+	}
+}
+/***************************************************************************************************************************
 **函数名称:	 	I2CTickDelay
 **函数功能:	 	
 **入口参数:

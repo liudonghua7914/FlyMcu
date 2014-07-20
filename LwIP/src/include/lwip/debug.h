@@ -83,7 +83,6 @@
  *  AND is of correct type AND is at least LWIP_DBG_LEVEL
  */
   
-
   
 #define LWIP_DEBUGF(debug, message) do { \
                                if ( \
@@ -96,6 +95,9 @@
                                  } \
                                } \
                              } while(0)
+							
+
+
 
 #else  /* LWIP_DEBUG */
 #define LWIP_DEBUGF(debug, message) 

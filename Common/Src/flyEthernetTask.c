@@ -169,7 +169,7 @@ void FlyEthernetTask(void *arg)
 {
 	while(1)
 	{
-		OSTimeDly(OS_TICKS_PER_SEC/10);  
+		OSTimeDly(OS_TICKS_PER_SEC/50);  
 		ethernetif_input(&flyEhternetInfo.netif);										
 	}
 }

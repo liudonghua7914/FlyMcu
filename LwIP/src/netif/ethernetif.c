@@ -220,11 +220,11 @@ low_level_input(struct netif *netif)
   if (LPC_EMAC->RxProduceIndex == LPC_EMAC->RxConsumeIndex) {
 	  return NULL;
   }	
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxConsumeIndex = %d \n",LPC_EMAC->RxConsumeIndex));	
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxProduceIndex = %d \n",LPC_EMAC->RxProduceIndex));	
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxConsumeIndex = %d \r\n",LPC_EMAC->RxConsumeIndex));	
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxProduceIndex = %d \r\n",LPC_EMAC->RxProduceIndex));	
   
   len = (RX_STAT_INFO(LPC_EMAC->RxConsumeIndex) & EMAC_RINFO_SIZE) - 1;
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH dropped packet Len = %d \n",len));	
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH dropped packet Len = %d \r\n",len));	
 #if ETH_PAD_SIZE
   len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
 #endif
@@ -270,6 +270,7 @@ low_level_input(struct netif *netif)
 	if (++idx == EMAC_NUM_RX_FRAG) {
 		idx = 0;
 	}
+	LPC_EMAC->RxConsumeIndex = idx;
 	
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */

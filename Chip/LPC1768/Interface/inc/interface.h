@@ -210,6 +210,7 @@ typedef struct _INTERFACE_INFO
 	U32 CanCount2;
 	U8  OpenUartDevice;
 	U32 UartCount;
+	char DebugMsg[64];
 }INTERFACE_INFO;
 
 	#ifndef		_INTERFACE_GLOBAL_
@@ -282,5 +283,7 @@ INTERFACE_GLOBAL void I2CStop(void);
 INTERFACE_GLOBAL BOOL WaitI2CACK(void);
 INTERFACE_GLOBAL BYTE I2CReadByte(void);
 INTERFACE_GLOBAL void I2CWriteByte(BYTE data);
+
+INTERFACE_GLOBAL void printf_w(const char *format, ...);
 #endif
 
