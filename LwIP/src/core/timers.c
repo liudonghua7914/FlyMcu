@@ -537,7 +537,7 @@ sys_timeouts_mbox_fetch(sys_mbox_t *mbox, void **msg)
       LWIP_TCPIP_THREAD_ALIVE();
 
       /* We try again to fetch a message from the mbox. */
-      goto again;
+      //goto again;
     } else {
       /* If time != SYS_ARCH_TIMEOUT, a message was received before the timeout
          occured. The time variable is set to the number of

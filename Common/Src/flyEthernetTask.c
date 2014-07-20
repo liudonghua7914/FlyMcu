@@ -16,6 +16,24 @@ BYTE gw_addr[] = {192, 168, 1, 1};
 BYTE netmask[] = { 255, 255, 0, 0};	
 BYTE mac_addr[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
 
+
+/***************************************************************************************************************************
+**函数名称:	 	ENET_IRQHandler
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ENET_IRQHandler(void)
+{
+	OSIntEnter();
+	if(EMAC_IntGetStatus(EMAC_INT_RX_DONE))
+	{
+		
+	}
+	
+	LPC_EMAC->IntClear = LPC_EMAC->IntStatus;
+	OSIntExit();
+}
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
 **函数功能:	 	
@@ -25,6 +43,17 @@ BYTE mac_addr[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
 static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
 
+}
+
+/***************************************************************************************************************************
+**函数名称:	 	LwIP_TimeOutTask
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void LwIP_TimeOutTask(void *arg)
+{
+	printf("\r\n LwIP_TimeOutTask %d ", OSTimeGet());
 }
 /***************************************************************************************************************************
 **函数名称:	 	ip_input
@@ -99,6 +128,8 @@ void ipcFlyEthernetInit(void)
 	netif_set_default(&flyEhternetInfo.netif);
 	netif_set_up(&flyEhternetInfo.netif);
 	
+		
+	
 	flyEhternetInfo.pUpdpcb = udp_new();
 	if(NULL == flyEhternetInfo.pUpdpcb)
 	{
@@ -130,6 +161,7 @@ void ipcFlyEthernetInit(void)
 	{
 		printf("\r\n tcp_connect fail");
 	}
+	
 	
 	
 	FlylyEthernetCreate();
@@ -167,10 +199,20 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 ***************************************************************************************************************************/
 void FlyEthernetTask(void *arg)
 {
+	uint32 Timerl = OSTimeGet();
 	while(1)
 	{
 		OSTimeDly(OS_TICKS_PER_SEC/50);  
-		ethernetif_input(&flyEhternetInfo.netif);										
+		ethernetif_input(&flyEhternetInfo.netif);
+		
+		if((OSTimeGet() - Timerl) > OS_TICKS_PER_SEC * 5)
+		{
+			Timerl = OSTimeGet();					
+			if(ERR_OK != tcpip_timeout(1000, LwIP_TimeOutTask, NULL))
+			{
+				printf("\r\n tcpip_timeout fail");
+			}	
+		}		
 	}
 }
 /***************************************************************************************************************************
