@@ -24,7 +24,6 @@
 #include "lpc17xx_emac.h"
 //#include "lpc17xx_dac.h"
 //#include "lpc17xx_gpdma.h"
-//#include "lpc17xx_emac.h"
 //#include "lpc17xx_i2s.h"
 //#include "lpc17xx_mcpwm.h"
 //#include "lpc17xx_pwm.h"

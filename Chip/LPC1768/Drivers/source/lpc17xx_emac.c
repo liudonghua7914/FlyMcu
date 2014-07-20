@@ -58,8 +58,6 @@ const uint8_t EMAC_clkdiv[] = { 4, 6, 8, 10, 14, 20, 28 };
 
 /* EMAC local DMA Descriptors */
 
-/** Rx Descriptor data array */
-static RX_Desc Rx_Desc[EMAC_NUM_RX_FRAG];
 
 /** Rx Status data array - Must be 8-Byte aligned */
 #if defined ( __CC_ARM   )
@@ -71,6 +69,11 @@ static RX_Stat Rx_Stat[EMAC_NUM_RX_FRAG];
 static __attribute__ ((aligned (8))) RX_Stat Rx_Stat[EMAC_NUM_RX_FRAG];
 #endif
 
+#if 1
+/** Rx Descriptor data array */
+static RX_Desc Rx_Desc[EMAC_NUM_RX_FRAG];
+
+
 /** Tx Descriptor data array */
 static TX_Desc Tx_Desc[EMAC_NUM_TX_FRAG];
 /** Tx Status data array */
@@ -78,10 +81,10 @@ static TX_Stat Tx_Stat[EMAC_NUM_TX_FRAG];
 
 /* EMAC local DMA buffers */
 /** Rx buffer data */
-static uint32_t rx_buf[EMAC_NUM_RX_FRAG][EMAC_ETH_MAX_FLEN>>2];
+static uint32_t rx_buf[EMAC_NUM_RX_FRAG][1];//EMAC_ETH_MAX_FLEN>>2
 /** Tx buffer data */
-static uint32_t tx_buf[EMAC_NUM_TX_FRAG][EMAC_ETH_MAX_FLEN>>2];
-
+static uint32_t tx_buf[EMAC_NUM_TX_FRAG][1];//EMAC_ETH_MAX_FLEN>>2
+#endif
 /**
  * @}
  */

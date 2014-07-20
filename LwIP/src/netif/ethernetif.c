@@ -58,6 +58,8 @@
 #include "lwip/Netif.h"
 
 #include "UserType.h"
+#include "lpc17xx_lib.h"
+
 /* Define those to better describe your network interface. */
 #define IFNAME0 'e'
 #define IFNAME1 'n'
@@ -133,20 +135,57 @@ low_level_output(struct netif *netif, struct pbuf *p)
   unsigned char *tx_buffer;
   unsigned int error = 0;
   uint32_t len = 0; 	
+  UNS_32 	Index;
+  UNS_32	IndexNext = LPC_EMAC->TxProduceIndex + 1;
   //initiate transfer();
   
-  //tx_buffer = (unsigned char *) TX_DESC_PACKET(LPC_EMAC->TxProduceIndex);	
+  tx_buffer = (unsigned char *) TX_DESC_PACKET(LPC_EMAC->TxProduceIndex);
 	
 #if ETH_PAD_SIZE
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
 
-  for(q = p; q != NULL; q = q->next) {
-	
+  for(q = p; q != NULL; q = q->next) 
+  {
+	 if (((unsigned int)len + q->len) >= (unsigned int) EMAC_ETH_FRAG_SIZE) 
+	 {
+		  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("can't send data, much big!\n"));
+		  error = 1;
+		  break;
+	  }
+	  memcpy(tx_buffer, q->payload, q->len);
+	  tx_buffer += q->len;
+	  len += q->len;
   }
 
- // signal that packet should be sent();
+  // signal that packet should be sent();
+  if (!error) 
+  {
+	  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH EMAC_SendPacket..... \n"));
+	  #if 1
+	  if(IndexNext > LPC_EMAC->TxDescriptorNumber)
+	  {
+		IndexNext = 0;
+	  }
+	 
+	  if(IndexNext == LPC_EMAC->TxConsumeIndex)
+	  {
+		return(FALSE);
+	  }
+	  
+	  Index = LPC_EMAC->TxProduceIndex;
+	  if (len > EMAC_ETH_FRAG_SIZE)
+	  {
+		len = EMAC_ETH_FRAG_SIZE;
+	  }
+	 
+	  TX_DESC_CTRL(Index) &= ~0x7ff;
+	  TX_DESC_CTRL(Index) |= (len - 1) & 0x7ff; 
 
+	  LPC_EMAC->TxProduceIndex = IndexNext;
+	  
+	  #endif
+  }
 #if ETH_PAD_SIZE
   pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
 #endif
@@ -171,11 +210,21 @@ low_level_input(struct netif *netif)
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *p, *q;
   u16_t len;
-#if 0	
+  unsigned int cpylen;
+  unsigned char *rx_buffer;
+  int idx;
+#if 1	
   /* Obtain the size of the packet and put it into the "len"
      variable. */
-  len = ;
-
+	
+  if (LPC_EMAC->RxProduceIndex == LPC_EMAC->RxConsumeIndex) {
+	  return NULL;
+  }	
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxConsumeIndex = %d \n",LPC_EMAC->RxConsumeIndex));	
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxProduceIndex = %d \n",LPC_EMAC->RxProduceIndex));	
+  
+  len = (RX_STAT_INFO(LPC_EMAC->RxConsumeIndex) & EMAC_RINFO_SIZE) - 1;
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH dropped packet Len = %d \n",len));	
 #if ETH_PAD_SIZE
   len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
 #endif
@@ -189,6 +238,7 @@ low_level_input(struct netif *netif)
     pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
 
+	rx_buffer = (unsigned char *) RX_DESC_PACKET(LPC_EMAC->RxConsumeIndex);   
     /* We iterate over the pbuf chain until we have read the entire
      * packet into the pbuf. */
     for(q = p; q != NULL; q = q->next) {
@@ -200,17 +250,42 @@ low_level_input(struct netif *netif)
        * actually received size. In this case, ensure the tot_len member of the
        * pbuf is the sum of the chained pbuf len members.
        */
-      read data into(q->payload, q->len);
+      //read data into(q->payload, q->len);
+		if (q->len >= len) 
+		{
+			cpylen = len;
+		} 
+		else 
+		{
+			cpylen = q->len;
+		}
+		memcpy((unsigned char *) q->payload, rx_buffer, cpylen);
+		rx_buffer += cpylen;
+		len = len - cpylen;
     }
-    acknowledge that packet has been read();
+    //acknowledge that packet has been read();
 
+	idx = LPC_EMAC->RxConsumeIndex;
+
+	if (++idx == EMAC_NUM_RX_FRAG) {
+		idx = 0;
+	}
+	
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
 #endif
 
     LINK_STATS_INC(link.recv);
   } else {
-    drop packet();
+    //drop packet();
+	LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("dropped packet \n"));
+    idx = LPC_EMAC->RxConsumeIndex;
+    if(++idx == EMAC_NUM_RX_FRAG) 
+	{
+	  idx = 0;
+    }
+
+	LPC_EMAC->RxConsumeIndex = idx;  
     LINK_STATS_INC(link.memerr);
     LINK_STATS_INC(link.drop);
   }

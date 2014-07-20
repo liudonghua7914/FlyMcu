@@ -77,6 +77,7 @@ extern "C"
 #define EMAC_NUM_RX_FRAG         4           /**< Num.of RX Fragments 4*1536= 6.0kB */
 #define EMAC_NUM_TX_FRAG         3           /**< Num.of TX Fragments 3*1536= 4.6kB */
 #define EMAC_ETH_MAX_FLEN        1536        /**< Max. Ethernet Frame Size          */
+#define EMAC_ETH_FRAG_SIZE       1536        /* Packet Fragment size 1536 Bytes   */
 #define EMAC_TX_FRAME_TOUT       0x00100000  /**< Frame Transmit timeout count      */
 
 

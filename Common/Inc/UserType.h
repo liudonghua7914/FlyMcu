@@ -1,6 +1,6 @@
 #ifndef 	__USERTYPE_H__
 #define		__USERTYPE_H__
-
+#include "LPC17xx.h"
 #include "system_LPC17xx.h"
 
 /**********************************/
