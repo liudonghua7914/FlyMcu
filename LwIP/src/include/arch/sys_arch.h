@@ -16,9 +16,9 @@
 #define 	LWIP_THREAD_TASK_PRIO_MAX	7
 
 #define		LWIP_THREAD_TASK_MAX 		3
-#define		LWIP_THREAD_TASK_STACK		300
+#define		LWIP_THREAD_TASK_STACK		200
 
-#define 	MAX_QUEUE_ENTRIES			100
+#define 	MAX_QUEUE_ENTRIES			50
 
 #define sys_arch_mbox_tryfetch(mbox,msg)  sys_arch_mbox_fetch(mbox,msg,1)
 

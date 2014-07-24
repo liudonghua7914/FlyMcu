@@ -79,7 +79,7 @@ void flySystemTask(void *arg)
 {
 	while(1)
 	{
-		printf("\r\n flySystemTask");
+		LIBMCU_DEBUG(SYSTEM_DEBUG,("\r\n flySystemTask"));
 		//checkIOStatus();
 		OSTimeDly(OS_TICKS_PER_SEC / 2);  
 	}
@@ -100,7 +100,7 @@ void flySystemTaskCreate(void)
 				 );
 	if(OS_NO_ERR != Res)
 	{
-		printf("\r\n Res = %d",Res);
+		LIBMCU_DEBUG(SYSTEM_DEBUG,("\r\n Res = %d",Res));
 	}
 }
 

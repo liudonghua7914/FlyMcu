@@ -53,7 +53,7 @@ static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 ***************************************************************************************************************************/
 void LwIP_TimeOutTask(void *arg)
 {
-	printf("\r\n LwIP_TimeOutTask %d ", OSTimeGet());
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_TimeOutTask %d ", OSTimeGet()));
 }
 /***************************************************************************************************************************
 **函数名称:	 	LwIP_Accept
@@ -63,7 +63,7 @@ void LwIP_TimeOutTask(void *arg)
 ***************************************************************************************************************************/
 err_t LwIP_Accept(void *arg, struct tcp_pcb *newpcb, err_t err)
 {
-	printf("\r\n LwIP_Accept");
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_Accept"));
 	return 0;
 }
 /***************************************************************************************************************************
@@ -132,7 +132,7 @@ void ipcFlyEthernetInit(void)
 	flyEhternetInfo.LwIPSem = OSSemCreate(0);
 	if(NULL == flyEhternetInfo.LwIPSem)
 	{
-		printf("\r\n OSSemCreate Fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n OSSemCreate Fail"));
 	}
 	
 	tcpip_init(NULL,NULL);
@@ -151,33 +151,33 @@ void ipcFlyEthernetInit(void)
 	flyEhternetInfo.pUpdpcb = udp_new();
 	if(NULL == flyEhternetInfo.pUpdpcb)
 	{
-		printf("\r\n udp_new fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_new fail"));
 	}
 	
 	if(ERR_OK != udp_bind(flyEhternetInfo.pUpdpcb,IP_ADDR_ANY,80))
 	{
-		printf("\r\n udp_bind fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_bind fail"));
 	}
 	
 	if(ERR_OK != udp_connect(flyEhternetInfo.pUpdpcb,IP_ADDR_ANY,80))
 	{
-		printf("\r\n udp_connect fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_connect fail"));
 	}
 	
 	flyEhternetInfo.pTcp = tcp_new();
 	if(NULL == flyEhternetInfo.pTcp)
 	{
-		printf("\r\n tcp_new fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_new fail"));
 	}
 	
 	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,80))//IP_ADDR_ANY
 	{
-		printf("\r\n tcp_bind fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_bind fail"));
 	}
 	
 	if(ERR_OK != tcp_connect(flyEhternetInfo.pTcp,&ip_computer,80,client_connected))
 	{
-		printf("\r\n tcp_connect fail");
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_connect fail"));
 	}
 	
 	
@@ -186,7 +186,7 @@ void ipcFlyEthernetInit(void)
 	tcp_accept(flyEhternetInfo.pTcp,LwIP_Accept);
 	
 	FlylyEthernetCreate();
-	printf("\r\n ipcFlyEthernetInit OK");	
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ipcFlyEthernetInit OK"));	
 }
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
@@ -227,7 +227,7 @@ void FlyEthernetTask(void *arg)
 		OSSemPend(flyEhternetInfo.LwIPSem,500,&err);
 		if((OS_NO_ERR != err) && (OS_TIMEOUT != err))
 		{
-			printf("\r\n err = %d ",err);
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n err = %d ",err));
 		}
 	#else
 		OSTimeDly(OS_TICKS_PER_SEC / 50);
@@ -251,7 +251,7 @@ void FlylyEthernetCreate(void)
 				 );
 	if(OS_NO_ERR != Res)
 	{
-		printf("\r\n Res = %d",Res);
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Res = %d",Res));
 	}
 }
 #endif

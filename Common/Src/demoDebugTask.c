@@ -39,7 +39,7 @@ void ipcEventProcDemoDebug(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t lengt
 	switch(enumWhatEvent)
 	{
 		case EVENT_GLOBAL_MODULE_INIT:		ipcDemoDebugInit();
-											printf("\r\n ipcDemoDebugInit OK");
+											LIBMCU_DEBUG(DEMO_DEBUG,("\r\n ipcDemoDebugInit OK"));
 											break;
 		
 		
@@ -61,10 +61,10 @@ void DemoDebugTask(void  *parg)
 {
 	while(1)
 	{
-//		printf("\r\n=============================================\r\n");
-//		printf("\r\n IO_SDCARDCD = %d",IO_Read(IO_SDCARDCD));
-//		printf("\r\n=============================================\r\n");
-//		DemoEEPROM();
+		LIBMCU_DEBUG(DEMO_DEBUG,("\r\n=============================================\r\n"));
+		LIBMCU_DEBUG(DEMO_DEBUG,("\r\n IO_SDCARDCD = %d",IO_Read(IO_SDCARDCD)));
+		LIBMCU_DEBUG(DEMO_DEBUG,("\r\n=============================================\r\n"));
+		DemoEEPROM();
 	   	OSTimeDly(OS_TICKS_PER_SEC);  
 	}
 }

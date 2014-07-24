@@ -93,7 +93,7 @@ typedef  void (*pFunction)(void);
 ***************************************************************************************************************************/
 void UserResetSystem(void)
 {
-	printf("\r\n****UserResetSystem***");
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\n****UserResetSystem***"));
 	NVIC_SystemReset();
 }
 /***************************************************************************************************************************
@@ -292,7 +292,7 @@ void I2C2_IRQHandler(void)
 					break;
 		
 		default:    
-					printf("\r\n LPC_I2C2Status_Case=%x",(LPC_I2C2->I2STAT & I2C_STAT_CODE_BITMASK));
+					LIBMCU_DEBUG(INTER_DEBUG,("\r\n LPC_I2C2Status_Case=%x",(LPC_I2C2->I2STAT & I2C_STAT_CODE_BITMASK)));
 					LPC_I2C2->I2CONCLR = I2C_I2CONCLR_SIC | I2C_I2CONCLR_STAC;  	
 					break;
 	}
@@ -524,26 +524,47 @@ int fputc(int ch, FILE *f)
 ***************************************************************************************************************************/
 void printf_w(const char *format, ...)
 {
-	int n = 0,i = 0;
+	int n = 0,m = 0,i = 0;
+	UINT32 times;
+	char *ptr;
 	va_list args; 
-	va_start(args, format);
+	va_start(args, format);	
+	
+	times = OSTimeGet();
+	m = snprintf(interfaceInfo.DebugTick,sizeof(interfaceInfo.DebugTick),"\r\n[%d.%03d]",times / 1000,times % 1000);
+	
+	
 	n = vsprintf(interfaceInfo.DebugMsg,format,args);
-	if('\n' == interfaceInfo.DebugMsg[n - 1])
+	
+	ptr = &interfaceInfo.DebugMsg[0];
+	if(('\r' == ptr[0]) || ('\n' == ptr[0]))
 	{
-		interfaceInfo.DebugMsg[n - 1] = '\r';
-		interfaceInfo.DebugMsg[n] = '\n';
-		n += 1;
+		ptr = &interfaceInfo.DebugMsg[1];
+		n -= 1;
 	}
-//	else
-//	{
-//		interfaceInfo.DebugMsg[n] = '\r';
-//		interfaceInfo.DebugMsg[n+1] = '\n';
-//		n += 2;
-//	}
+	
+	if(('\r' == ptr[1]) || ('\n' == ptr[1]))
+	{
+		ptr = &interfaceInfo.DebugMsg[2];
+		n -= 1;
+	}
+	
+
+	if('\n' == ptr[n - 1])
+	{
+		n -= 1;
+	}
 	va_end(args);
+
+	
+	for(i = 0;i < m;i++)
+	{
+		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugTick[i], 1, BLOCKING);
+	}
+	
 	for(i = 0;i < n;i++)
 	{
-		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugMsg[i], 1, BLOCKING);
+		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&ptr[i], 1, BLOCKING);
 	}
 }
 /***************************************************************************************************************************
@@ -631,7 +652,7 @@ BOOL WaitI2CACK(void)
 	IO_SDA_INOUT(1);
 	if(!bRes)
 	{
-		printf("\r\n Stop");
+		LIBMCU_DEBUG(INTER_DEBUG,("\r\n Stop"));
 		I2CStop();
 	}
 	return bRes;
@@ -697,14 +718,14 @@ void I2CWriteByte(BYTE data)
 ***************************************************************************************************************************/
 void PrintWellcomeMsg(void)
 {
-	printf("%s",menu1);
-	printf("Build in:");
-	printf("%d-",year);
-	printf("%d-",months);
-	printf("%d ",day);
-	printf("%d:",hours);
-	printf("%d:",minutes);
-	printf("%d",seconds);
+	LIBMCU_DEBUG(INTER_DEBUG,("%s",menu1));
+	LIBMCU_DEBUG(INTER_DEBUG,("Build in:"));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d-",year));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d-",months));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d ",day));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d:",hours));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d:",minutes));
+	LIBMCU_DEBUG(INTER_DEBUG,("%d",seconds));
 }
 /***************************************************************************************************************************
 **函数名称:	 	SysTickInit
@@ -951,7 +972,7 @@ void naviBoardCommDeInit(void)
 void IntoDeepSleep(void)
 {	
 	EXTI_InitTypeDef EXTI_InitStruct;
-	printf("\r\n IntoDeepSleep");
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\n IntoDeepSleep"));
 	EXTI_Init();	
 	EXTI_InitStruct.EXTI_Line = EXTI_EINT3;
 	EXTI_InitStruct.EXTI_Mode = EXTI_MODE_EDGE_SENSITIVE;
@@ -1035,7 +1056,7 @@ BOOL IO_Read(U32 IOEnum)
 								Pin = IIC_SCL_PIN;
 								break;
 								
-		default:				printf("\r\n Read Other Port");			
+		default:				LIBMCU_DEBUG(INTER_DEBUG,("\r\n Read Other Port"));			
 								bRes = FALSE;
 								break;
 	}
@@ -1105,7 +1126,7 @@ void IO_Write(U32 IOEnum,BOOL status)
 								Pin = IIC_SDA_PIN;
 								break;
 		
-		default:				printf("\r\n Other Port");
+		default:				LIBMCU_DEBUG(INTER_DEBUG,("\r\n Other Port"));
 								bRes = FALSE;
 								break;
 	}
@@ -1173,7 +1194,7 @@ void FlyUART_Init(U32 ComEnum,U32 baudrate)
 	PinCfg.Pinnum = 1;
 	PINSEL_ConfigPin(&PinCfg);
 
-	printf("\r\nComEnum = %d baudrate = %d",ComEnum,baudrate);
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\nComEnum = %d baudrate = %d",ComEnum,baudrate));
 	switch(ComEnum)
 	{
 		case 0X01:		break;
@@ -1182,7 +1203,7 @@ void FlyUART_Init(U32 ComEnum,U32 baudrate)
 		case 0X04:		
 		case 0X05:		Uartx = (LPC_UART_TypeDef *)LPC_UART1;
 						IRQx = UART1_IRQn;
-						printf("\r\n LPC UART");
+						LIBMCU_DEBUG(INTER_DEBUG,("\r\n LPC UART"));
 						break;
 			
 	}
@@ -1305,7 +1326,7 @@ void FlyCAN_Transmit(U32 CanEnum,CanTxMsg *CAN_Msg)
 		
 	if(CAN_SendMsg(CANx, &LPC_CANTxMsg) == ERROR)
 	{
-		printf("\r\n CAN_SendMsg  ERROR");
+		LIBMCU_DEBUG(INTER_DEBUG,("\r\n CAN_SendMsg  ERROR"));
 	}
 }
 /***************************************************************************************************************************
@@ -1335,7 +1356,7 @@ void FlyCAN_DeInit(U32 CanEnum)
 void SetPwmDutyCycle(u16 DutyCycle)
 {
 	u16 temp;
-	printf("\r\n DutyCycle %d",DutyCycle);
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\n DutyCycle %d",DutyCycle));
 	if(DutyCycle > 100)
 	{	
 		DutyCycle = 100;
@@ -1676,7 +1697,7 @@ void FlyEthernetInit(void)
 	EMAC_ConfigStruct.pbEMAC_Addr = MACBuf;
 	if(SUCCESS == EMAC_Init(&EMAC_ConfigStruct))
 	{
-		printf("\r\n SUCCESS");
+		LIBMCU_DEBUG(INTER_DEBUG,("\r\n SUCCESS"));
 	}
 	EMAC_IntCmd(EMAC_INT_RX_DONE,ENABLE);
 	NVIC_SetPriority(ENET_IRQn,(u8)ENET_IRQn);
@@ -1709,7 +1730,7 @@ void chipInit(void)
 	parameterInit();
 	FlyEthernetInit();
 	ipcExchangeInit();
-	printf("\r\nparameterInit");
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\nparameterInit"));
 }
 /***************************************************************************************************************************
 **函数名称:	 	chipDeInit
@@ -1719,7 +1740,7 @@ void chipInit(void)
 ***************************************************************************************************************************/
 void chipDeInit(void)
 {
-	printf("\r\nchipDeInit");
+	LIBMCU_DEBUG(INTER_DEBUG,("\r\nchipDeInit"));
 	SysTickDeInit();
 	
 	

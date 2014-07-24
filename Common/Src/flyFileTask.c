@@ -19,9 +19,9 @@ void ipcFileSystemInit(void)
 	flyFileInfo.fp = FS_FOpen("mmc:\\test.txt","ab+");
 	if(NULL == flyFileInfo.fp)
 	{
-		printf("\r\n FS_FOpen Fail");
+		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
 	}
-	printf("\r\n ipcFileSystemInit OK");
+	LIBMCU_DEBUG(FILE_DEBUG,("\r\n ipcFileSystemInit OK"));
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	ipcEventProcflyFile
@@ -48,14 +48,14 @@ void ipcEventProcflyFile(ULONG enumWhatEvent,ULONG lPara,BYTE *p,UINT length)
 			
 		case EVENT_GLOBAL_FLY_FILE_WRITE:	if(flyFileInfo.fp)
 											{									
-												printf("\r\n Write: %d ",length);
+												LIBMCU_DEBUG(FILE_DEBUG,("\r\n Write: %d ",length));
 												FS_FWrite(p,1,length,flyFileInfo.fp);
 											}
 											break;		
 		
 		case EVENT_GLOBAL_FLY_FILE_READ:	if(flyFileInfo.fp)
 											{									
-												printf("\r\n Read: %d ",length);
+												LIBMCU_DEBUG(FILE_DEBUG,("\r\n Read: %d ",length));
 												FS_FRead(p,1,length,flyFileInfo.fp);
 											}
 											break;		
@@ -98,7 +98,7 @@ void flyFileTaskCreate(void)
 				 );
 	if(OS_NO_ERR != Res)
 	{
-		printf("\r\n Res = %d",Res);
+		LIBMCU_DEBUG(FILE_DEBUG,("\r\n Res = %d",Res));
 	}
 	
 }

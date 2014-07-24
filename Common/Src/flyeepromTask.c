@@ -28,10 +28,10 @@ BOOL WriteEEPROMFrameBuf(BYTE Addr,BYTE *p,UINT Len)
 	BYTE i = 0;
 	BOOL bRes = FALSE;
 	
-	printf("\r\n<<<<<WritEEPROMFrameBuf>>>>>: %x",Addr);
+	LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n<<<<<WritEEPROMFrameBuf>>>>>: %x",Addr));
 	for(i = 0;i < Len;i++)
 	{
-		printf(" %x",p[i]);
+		LIBMCU_DEBUG(EEPROM_DEBUG,(" %x",p[i]));
 	}
 	OS_ENTER_CRITICAL();
 	I2CStart();
@@ -39,7 +39,7 @@ BOOL WriteEEPROMFrameBuf(BYTE Addr,BYTE *p,UINT Len)
 	bRes = WaitI2CACK();
 	if(!bRes)
 	{
-		printf("\r\n W->NACK 1");
+		LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n W->NACK 1"));
 		return FALSE;
 		
 	}
@@ -49,7 +49,7 @@ BOOL WriteEEPROMFrameBuf(BYTE Addr,BYTE *p,UINT Len)
 		bRes = WaitI2CACK();
 		if(!bRes)
 		{
-			printf("\r\n W->NACK 2");
+			LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n W->NACK 2"));
 			return FALSE;
 			
 		}
@@ -78,7 +78,7 @@ BOOL ReadEEPROMFrameBuf(BYTE ChipAddr,BYTE RegAddr,BYTE *p,UINT Len)
 		bRes = WaitI2CACK();
 		if(!bRes)
 		{
-			printf("\r\n R->NACK 1");
+			LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n R->NACK 1"));
 			return FALSE;
 			
 		}
@@ -88,7 +88,7 @@ BOOL ReadEEPROMFrameBuf(BYTE ChipAddr,BYTE RegAddr,BYTE *p,UINT Len)
 		bRes = WaitI2CACK();
 		if(!bRes)
 		{
-			printf("\r\n R->NACK 3");
+			LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n R->NACK 3"));
 			return FALSE;
 		}
 		I2CStart();
@@ -96,7 +96,7 @@ BOOL ReadEEPROMFrameBuf(BYTE ChipAddr,BYTE RegAddr,BYTE *p,UINT Len)
 		bRes = WaitI2CACK();
 		if(!bRes)
 		{
-			printf("\r\n R->NACK 4");
+			LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n R->NACK 4"));
 			return FALSE;
 		}
 		p[i] = I2CReadByte();
@@ -185,7 +185,7 @@ void messageToFifo(BYTE *p,UINT length)
 	OS_ENTER_CRITICAL();
 	if(length + 1 > 0XFF)
 	{
-		printf("\r\n message error");
+		LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n message error"));
 		return;
 	}
 	
@@ -278,7 +278,7 @@ void getFlyEEPROMMessageBuf(void)
 		if(!WriteEEPROMFrameBuf(CHIP_ADDR,flyeepromInfo.FrameBuf,Length))
 		{
 			bRes = FALSE;
-			printf("\r\n WriteEEPROM Fail");
+			LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n WriteEEPROM Fail"));
 		}
 		
 		if(bRes)
@@ -288,12 +288,12 @@ void getFlyEEPROMMessageBuf(void)
 			{
 				for(i = 0;i < Length - 1;i++)
 				{
-					printf("\r\n rec[%d] %x ",i,flyeepromInfo.recBuf[i]);
+					LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n rec[%d] %x ",i,flyeepromInfo.recBuf[i]));
 				}
 			}
 			else
 			{
-				printf("\r\n ReadEEPROM Fail");
+				LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n ReadEEPROM Fail"));
 			}
 		}
 		Length = 0;
@@ -324,10 +324,10 @@ void ipcFlyEEPROMInit(void)
 	flyeepromInfo.pFlyEEPORMSemEvent = OSSemCreate(0);
 	if(NULL == flyeepromInfo.pFlyEEPORMSemEvent)
 	{
-		printf("\r\n ipcFlyEEPROMInit Fail");
+		LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n ipcFlyEEPROMInit Fail"));
 		return;
 	}
-	printf("\r\n ipcFlyEEPROMInit OK");
+	LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n ipcFlyEEPROMInit OK"));
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	ipcEventProcFlyEEPROM
@@ -343,7 +343,7 @@ void ipcEventProcFlyEEPROM(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t lengt
 		case EVENT_GLOBAL_MODULE_INIT:		ipcFlyEEPROMInit();				
 											break;
 		
-		case EVENT_GLOBAL_FLY_EEPROM_CMD:	PutMessageToFrameBuff(0X00,p,length);
+		case EVENT_GLOBAL_FLY_EEPROM_CMD:	//PutMessageToFrameBuff(0X00,p,length);
 																			
 		default:							break;
 	}
@@ -384,6 +384,6 @@ void FlyEEPROMTaskCreate(void)
 				 );
 	if(OS_NO_ERR != Res)
 	{
-		printf("\r\n Res = %d",Res);
+		LIBMCU_DEBUG(EEPROM_DEBUG,("\r\n Res = %d",Res));
 	}
 }

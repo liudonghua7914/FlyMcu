@@ -431,7 +431,7 @@ EMAC_RINFO_LEN_ERR   | EMAC_RINFO_ALIGN_ERR | EMAC_RINFO_OVERRUN)
 /* DP83848C PHY definition ------------------------------------------------------------ */
 
 /** PHY device reset time out definition */
-#define EMAC_PHY_RESP_TOUT		0x100000UL
+#define EMAC_PHY_RESP_TOUT		0x000100UL
 
 /* ENET Device Revision ID */
 #define EMAC_OLD_EMAC_MODULE_ID  0x39022000  /**< Rev. ID for first rev '-'         */
@@ -518,7 +518,7 @@ EMAC_RINFO_LEN_ERR   | EMAC_RINFO_ALIGN_ERR | EMAC_RINFO_OVERRUN)
 #elif defined(IAR_LPC_1768)
 /* KSZ8721BL PHY definition ------------------------------------------------------------ */
 /** PHY device reset time out definition */
-#define EMAC_PHY_RESP_TOUT		0x100000UL
+#define EMAC_PHY_RESP_TOUT		0x000100UL
 
 /* ENET Device Revision ID */
 #define EMAC_OLD_EMAC_MODULE_ID  0x39022000  /**< Rev. ID for first rev '-'         */

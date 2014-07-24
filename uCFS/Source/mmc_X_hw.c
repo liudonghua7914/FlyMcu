@@ -244,10 +244,10 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	if(eSDV2_0_SDHC != SDCardType)
 	{
 		Sector <<= 9;
-//		printf("\r\n read offset Addr");
+//		LIBMCU_DEBUG("\r\n read offset Addr");
 	}
 	
-//	printf("\r\n Read Addr %08x :",Sector);
+//	LIBMCU_DEBUG("\r\n Read Addr %08x :",Sector);
 	
 	
 	SendBuf[1] = (Sector >> 24) & 0XFF;
@@ -271,7 +271,7 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	}while(count < 200);
 	if(!bRes)
 	{
-		printf("\r\n R 1 %d %x ",bRes,Res);
+		LIBMCU_DEBUG(LIBMCU_DBG_ON,("\r\n R 1 %d %x ",bRes,Res));
 	}
 	if(bRes)
 	{	
@@ -291,7 +291,7 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	}
 	if(!bRes)
 	{
-		printf("\r\n R 2 %d %x ",bRes,Res);
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n R 2 %d %x ",bRes,Res));
 	}
 	if(bRes)
 	{
@@ -301,7 +301,7 @@ int FS__MMC_ReadSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 		}
 		else
 		{
-			printf("\r\n Read No place");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n Read No place"));
 		}
 		
 	}
@@ -336,7 +336,7 @@ int FS__MMC_WriteSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	if(eSDV2_0_SDHC != SDCardType)
 	{
 		Sector <<= 9;
-//		printf("\r\n write offset Addr");
+//		LIBMCU_DEBUG("\r\n write offset Addr");
 	}
 	SendBuf[1] = (Sector >> 24) & 0XFF;
 	SendBuf[2] = (Sector >> 16) & 0XFF;
@@ -358,7 +358,7 @@ int FS__MMC_WriteSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 	
 	if(!bRes)
 	{
-		printf("\r\n W  1 %d %x ",bRes,Res);
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n W  1 %d %x ",bRes,Res));
 	}
 
 	if(bRes)
@@ -383,7 +383,7 @@ int FS__MMC_WriteSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 		}while(count < 200);
 		if(!bRes)
 		{
-			printf("\r\n W  2 %d %x ",bRes,Res);
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n W  2 %d %x ",bRes,Res));
 		}
 		if(bRes)
 		{
@@ -402,7 +402,7 @@ int FS__MMC_WriteSector(FS_u32 Unit,unsigned int Sector,unsigned char *pBuffer)
 		}
 		if(!bRes)
 		{
-			printf("\r\n W  3 %d %x ",bRes,Res);
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n W  3 %d %x ",bRes,Res));
 		}
 	}
 	
@@ -451,7 +451,7 @@ void FS_MMC_HW_X_ReadWrite(FS_u32 id,FS_u8 *pWrite, int wLen,FS_u8 *pRead, int r
 	FS_u8 times = 0;
 	FS_u32 i;
 	
-	printf("\r\n FS_MMC_HW_X_ReadWrite: ");
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS_MMC_HW_X_ReadWrite: "));
 	for(i = 0;i < wLen;i++)
 	{
 		printf("%x ",pWrite[i]);

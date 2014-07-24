@@ -207,7 +207,7 @@ int main(void)
 	OSInit();
 	if(FS_Init() < 0)
 	{
-		printf("\r\n FS_Init Fail");
+		LIBMCU_DEBUG(MAIN_DEBUG,("\r\n FS_Init Fail"));
 	}
 	TaskInit();
    	OSStart();

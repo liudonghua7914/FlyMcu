@@ -19,9 +19,29 @@
 #include "IAP.h"
 
 
+#define		LIBMCU_DBG_OFF		0
+#define		LIBMCU_DBG_ON		1
 
 
+#define		MAIN_DEBUG			LIBMCU_DBG_ON
+#define		DEMO_DEBUG			LIBMCU_DBG_OFF
+#define		EEPROM_DEBUG		LIBMCU_DBG_ON
+#define		FILE_DEBUG			LIBMCU_DBG_ON
+#define		SYSTEM_DEBUG		LIBMCU_DBG_ON
+#define		ETHERNTE_DEBUG		LIBMCU_DBG_ON	
+#define		MMC_DEBUG			LIBMCU_DBG_ON
+#define		INTER_DEBUG			LIBMCU_DBG_ON
 
+#define 	MCU_PLATFORM_DIAG(x)	printf_w x 
+
+
+#define LIBMCU_DEBUG(debug,message)	do\
+									{\
+										if(debug)\
+										{\
+											MCU_PLATFORM_DIAG(message);\
+										}\
+									}while(0)\
 
 
 #define	 FLY_SSP0		0x00
@@ -210,7 +230,8 @@ typedef struct _INTERFACE_INFO
 	U32 CanCount2;
 	U8  OpenUartDevice;
 	U32 UartCount;
-	char DebugMsg[64];
+	char DebugMsg[128];
+	char DebugTick[15];
 }INTERFACE_INFO;
 
 	#ifndef		_INTERFACE_GLOBAL_
