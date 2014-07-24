@@ -1433,6 +1433,7 @@ ethernet_input(struct pbuf *p, struct netif *netif)
       } else {
         /* pass to IP layer */
         ip_input(p, netif);
+		LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE,("ethernet_input ->ip_input \n")); 
       }
       break;
       

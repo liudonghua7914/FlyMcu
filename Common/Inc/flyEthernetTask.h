@@ -22,7 +22,7 @@
 #endif
 
 
-#define  		FLYETHERNET_TASK_START_STK_SIZE          150
+#define  		FLYETHERNET_TASK_START_STK_SIZE         250
 #define 		RECSIZE			256
 
 #define	 MAC0		0X1e
@@ -47,6 +47,8 @@ typedef struct
 	struct tcp_pcb *pTcp;
 	
 	struct netif netif;
+	
+	OS_EVENT *LwIPSem;
 }T_FLYEHTERNET_INFO;	
 
 

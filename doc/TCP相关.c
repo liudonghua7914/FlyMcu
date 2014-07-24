@@ -198,8 +198,9 @@ void WriteEthernetData(BYTE *p,UINT len)
 
 
 
-
-
+1. etharp_send_ip->netif->linkoutput(netif, p);
+2. etharp_arp_input->netif->linkoutput(netif, p);
+3. etharp_raw->netif->linkoutput(netif, p);
 
 
 

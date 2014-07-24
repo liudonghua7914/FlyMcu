@@ -1033,6 +1033,7 @@ tcp_output(struct tcp_pcb *pcb)
     seg->oversize_left = 0;
 #endif /* TCP_OVERSIZE_DBGCHECK */
     tcp_output_segment(seg, pcb);
+	LWIP_DEBUGF(TCP_OUTPUT_DEBUG, ("tcp_outputtcp_output_segment \n"));
     snd_nxt = ntohl(seg->tcphdr->seqno) + TCP_TCPLEN(seg);
     if (TCP_SEQ_LT(pcb->snd_nxt, snd_nxt)) {
       pcb->snd_nxt = snd_nxt;

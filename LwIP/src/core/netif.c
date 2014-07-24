@@ -179,7 +179,7 @@ netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
 #endif
 
   LWIP_ASSERT("No init function given", init != NULL);
-
+  LWIP_DEBUGF(NETIF_DEBUG,("netif_add \n"));
   /* reset new interface configuration state */
   ip_addr_set_zero(&netif->ip_addr);
   ip_addr_set_zero(&netif->netmask);

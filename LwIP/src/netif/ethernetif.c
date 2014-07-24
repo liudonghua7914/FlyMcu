@@ -75,7 +75,7 @@ struct ethernetif {
   /* Add whatever per-interface state that is needed here. */
 };
 
-/* Forward declarations. */
+/* Forward declarations. */ 
 
 
 /**
@@ -132,7 +132,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
 {
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *q;
-  unsigned char *tx_buffer;
+  unsigned char *tx_buffer = NULL;
   unsigned int error = 0;
   uint32_t len = 0; 	
   UNS_32 	Index;
@@ -140,7 +140,12 @@ low_level_output(struct netif *netif, struct pbuf *p)
   //initiate transfer();
   
   tx_buffer = (unsigned char *) TX_DESC_PACKET(LPC_EMAC->TxProduceIndex);
-	
+  if(NULL == tx_buffer)
+  {
+	LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("tx_buffer is NULL\n"));
+  }	
+
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH TxProduceIndex = %d \n", LPC_EMAC->TxProduceIndex));  
 #if ETH_PAD_SIZE
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
@@ -161,7 +166,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
   // signal that packet should be sent();
   if (!error) 
   {
-	  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH EMAC_SendPacket..... \n"));
+	  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH EMAC_SendPacket..... len = %d \n",len));
 	  #if 1
 	  if(IndexNext > LPC_EMAC->TxDescriptorNumber)
 	  {
@@ -180,8 +185,8 @@ low_level_output(struct netif *netif, struct pbuf *p)
 	  }
 	 
 	  TX_DESC_CTRL(Index) &= ~0x7ff;
-	  TX_DESC_CTRL(Index) |= (len - 1) & 0x7ff; 
-
+	  TX_DESC_CTRL(Index) |= ((len - 1) & 0x7ff) | (EMAC_TCTRL_INT | EMAC_TCTRL_LAST); 
+	  
 	  LPC_EMAC->TxProduceIndex = IndexNext;
 	  
 	  #endif
@@ -191,7 +196,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
 #endif
   
   LINK_STATS_INC(link.xmit);
-
+  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH EMAC_SendPacket.....end \n")); 
   return ERR_OK;
 }
 
@@ -220,11 +225,9 @@ low_level_input(struct netif *netif)
   if (LPC_EMAC->RxProduceIndex == LPC_EMAC->RxConsumeIndex) {
 	  return NULL;
   }	
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxConsumeIndex = %d \r\n",LPC_EMAC->RxConsumeIndex));	
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH RxProduceIndex = %d \r\n",LPC_EMAC->RxProduceIndex));	
+ 
   
   len = (RX_STAT_INFO(LPC_EMAC->RxConsumeIndex) & EMAC_RINFO_SIZE) - 1;
-  LWIP_DEBUGF(LWIP_DBG_TYPES_ON,("LDH dropped packet Len = %d \r\n",len));	
 #if ETH_PAD_SIZE
   len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
 #endif

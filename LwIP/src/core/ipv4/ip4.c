@@ -574,6 +574,7 @@ ip_input(struct pbuf *p, struct netif *inp)
     case IP_PROTO_ICMP:
       snmp_inc_ipindelivers();
       icmp_input(p, inp);
+	  LWIP_DEBUGF(IP_DEBUG, ("ip_input->icmp_input\n")); 
       break;
 #endif /* LWIP_ICMP */
 #if LWIP_IGMP
@@ -600,14 +601,14 @@ ip_input(struct pbuf *p, struct netif *inp)
       snmp_inc_ipinunknownprotos();
     }
   }
-
+  
   /* @todo: this is not really necessary... */
   ip_data.current_netif = NULL;
   ip_data.current_ip4_header = NULL;
   ip_data.current_ip_header_tot_len = 0;
   ip_addr_set_any(ip_current_src_addr());
   ip_addr_set_any(ip_current_dest_addr());
-
+   LWIP_DEBUGF(IP_DEBUG, ("LDH ip_input OK \n"));
   return ERR_OK;
 }
 
