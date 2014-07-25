@@ -17,7 +17,6 @@ BYTE SendBuf[] = {"\r\nFlyAudio!!!FlyAudio!!!FlyAudio!!!FlyAudio!!!FlyAudio!!!Fl
 ***************************************************************************************************************************/
 void checkIOSDDelectStatus(void)
 {
-	
 	if(flySystemInfo.bIOSDDelectStatus != IO_Read(IO_SDCARDCD))
 	{
 		flySystemInfo.bIOSDDelectStatus = IO_Read(IO_SDCARDCD);

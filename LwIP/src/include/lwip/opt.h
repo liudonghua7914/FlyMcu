@@ -2360,7 +2360,7 @@
  * IP_DEBUG: Enable debugging for IP.
  */
 #ifndef IP_DEBUG
-#define IP_DEBUG                        LWIP_DBG_OFF
+#define IP_DEBUG                        LWIP_DBG_ON
 #endif
 
 /**

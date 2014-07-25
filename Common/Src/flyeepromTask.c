@@ -225,7 +225,10 @@ void PutMessageToFrameBuff(BYTE RegAddr,BYTE *p,UINT Len)
 	flyeepromInfo.sendBufLength = Len + 4;
 	messageToFifo(flyeepromInfo.sendBuf,flyeepromInfo.sendBufLength);
 	OS_EXIT_CRITICAL();
-	OSSemPost(flyeepromInfo.pFlyEEPORMSemEvent);
+	if(NULL != flyeepromInfo.pFlyEEPORMSemEvent)
+	{
+		OSSemPost(flyeepromInfo.pFlyEEPORMSemEvent);
+	}
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	getMessageFromBuff

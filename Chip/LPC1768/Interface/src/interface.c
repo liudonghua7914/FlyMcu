@@ -10,6 +10,9 @@
 
 
 
+
+
+
 uint8_t menu1[] =
 "\r\n******************************************\r\n"     
 "              Hello World                 \r\n"
@@ -492,6 +495,7 @@ void _EI(void)
 {
 	OS_EXIT_CRITICAL();
 }
+
 /***************************************************************************************************************************
 **函数名称:	 	getBatteryVoltage
 **函数功能:	 	
@@ -516,57 +520,7 @@ int fputc(int ch, FILE *f)
 	#endif
 	return (0);
 }
-/***************************************************************************************************************************
-**函数名称:	 	printf_w
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-void printf_w(const char *format, ...)
-{
-	int n = 0,m = 0,i = 0;
-	UINT32 times;
-	char *ptr;
-	va_list args; 
-	va_start(args, format);	
-	
-	times = OSTimeGet();
-	m = snprintf(interfaceInfo.DebugTick,sizeof(interfaceInfo.DebugTick),"\r\n[%d.%03d]",times / 1000,times % 1000);
-	
-	
-	n = vsprintf(interfaceInfo.DebugMsg,format,args);
-	
-	ptr = &interfaceInfo.DebugMsg[0];
-	if(('\r' == ptr[0]) || ('\n' == ptr[0]))
-	{
-		ptr = &interfaceInfo.DebugMsg[1];
-		n -= 1;
-	}
-	
-	if(('\r' == ptr[1]) || ('\n' == ptr[1]))
-	{
-		ptr = &interfaceInfo.DebugMsg[2];
-		n -= 1;
-	}
-	
 
-	if('\n' == ptr[n - 1])
-	{
-		n -= 1;
-	}
-	va_end(args);
-
-	
-	for(i = 0;i < m;i++)
-	{
-		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugTick[i], 1, BLOCKING);
-	}
-	
-	for(i = 0;i < n;i++)
-	{
-		UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&ptr[i], 1, BLOCKING);
-	}
-}
 /***************************************************************************************************************************
 **函数名称:	 	I2CTickDelay
 **函数功能:	 	
@@ -1725,6 +1679,7 @@ void chipInit(void)
 	SystemInit();
 	SysTickInit();
 	WatchdogInit();
+	DemofifoInit();
 	DebugInit();	
 	PrintWellcomeMsg();	
 	parameterInit();

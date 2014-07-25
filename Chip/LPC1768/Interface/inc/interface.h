@@ -19,6 +19,9 @@
 #include "IAP.h"
 
 
+
+
+
 #define		LIBMCU_DBG_OFF		0
 #define		LIBMCU_DBG_ON		1
 
@@ -31,17 +34,6 @@
 #define		ETHERNTE_DEBUG		LIBMCU_DBG_ON	
 #define		MMC_DEBUG			LIBMCU_DBG_ON
 #define		INTER_DEBUG			LIBMCU_DBG_ON
-
-#define 	MCU_PLATFORM_DIAG(x)	printf_w x 
-
-
-#define LIBMCU_DEBUG(debug,message)	do\
-									{\
-										if(debug)\
-										{\
-											MCU_PLATFORM_DIAG(message);\
-										}\
-									}while(0)\
 
 
 #define	 FLY_SSP0		0x00
@@ -222,6 +214,8 @@ typedef struct
 } CanTxMsg;
 
 
+
+
 typedef struct _INTERFACE_INFO
 {
 	U32 SysTickCount;
@@ -230,8 +224,9 @@ typedef struct _INTERFACE_INFO
 	U32 CanCount2;
 	U8  OpenUartDevice;
 	U32 UartCount;
-	char DebugMsg[128];
+	char DebugMsg[256];
 	char DebugTick[15];
+ 
 }INTERFACE_INFO;
 
 	#ifndef		_INTERFACE_GLOBAL_
@@ -305,6 +300,6 @@ INTERFACE_GLOBAL BOOL WaitI2CACK(void);
 INTERFACE_GLOBAL BYTE I2CReadByte(void);
 INTERFACE_GLOBAL void I2CWriteByte(BYTE data);
 
-INTERFACE_GLOBAL void printf_w(const char *format, ...);
+
 #endif
 

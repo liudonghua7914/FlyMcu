@@ -28,7 +28,10 @@ void ENET_IRQHandler(void)
 	//OSIntEnter();
 	if(EMAC_IntGetStatus(EMAC_INT_RX_DONE))
 	{
-		OSSemPost(flyEhternetInfo.LwIPSem);
+		if(NULL != flyEhternetInfo.LwIPSem)
+		{
+			OSSemPost(flyEhternetInfo.LwIPSem);
+		}
 	}
 	
 	LPC_EMAC->IntClear = LPC_EMAC->IntStatus;

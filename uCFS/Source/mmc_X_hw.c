@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include "interface.h"
+#include "UserType.h"
 #include "fs_include.h"
 #include "mmc_x_hw.h"
 #define	TIMESMAX  250
@@ -454,7 +455,7 @@ void FS_MMC_HW_X_ReadWrite(FS_u32 id,FS_u8 *pWrite, int wLen,FS_u8 *pRead, int r
 	LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS_MMC_HW_X_ReadWrite: "));
 	for(i = 0;i < wLen;i++)
 	{
-		printf("%x ",pWrite[i]);
+		LIBMCU_DEBUG(MMC_DEBUG,("%x ",pWrite[i]));
 	}
 	FS_MMC_HW_X_SetCS(id,0);
 	FlySSP_ReadWrite(FLY_SSP0,FLYWRITE,pWrite,wLen);

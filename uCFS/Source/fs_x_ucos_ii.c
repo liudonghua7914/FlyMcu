@@ -73,7 +73,10 @@ void  FS_X_OS_LockFileHandle (void)
 
 void  FS_X_OS_UnlockFileHandle (void) 
 {
-    OSSemPost(FS_SemFileHandle);
+	if(NULL != FS_SemFileHandle)
+	{
+		OSSemPost(FS_SemFileHandle);
+	}
 }
 
 /*
@@ -98,7 +101,10 @@ void  FS_X_OS_LockFileOp (FS_FILE *fp)
 
 void  FS_X_OS_UnlockFileOp (FS_FILE *fp) 
 {
-    OSSemPost(FS_SemFileOps);
+	if(NULL != FS_SemFileOps)
+	{
+		OSSemPost(FS_SemFileOps);
+	}
 }
 
 /*$PAGE*/

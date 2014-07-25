@@ -205,11 +205,11 @@ int main(void)
 	IntDisAll();
 	chipInit();
 	OSInit();
+	TaskInit();
 	if(FS_Init() < 0)
 	{
 		LIBMCU_DEBUG(MAIN_DEBUG,("\r\n FS_Init Fail"));
 	}
-	TaskInit();
    	OSStart();
 	return 0;
 }

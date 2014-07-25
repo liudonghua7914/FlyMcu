@@ -17,7 +17,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "interface.h"
+extern void printf_w(const char *format, ...);
+
 
 #define BYTE_ORDER  LITTLE_ENDIAN
 
