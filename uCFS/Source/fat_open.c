@@ -245,7 +245,7 @@ static FS_i32 _FS_fat_create_file(int Idx, FS_u32 Unit,  const char *pFileName,
   int err;
   FS_u16 val;
   char *buffer;
-  printf("\r\n create_file");
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n create_file"));
   buffer = FS__fat_malloc(FS_FAT_SEC_SIZE);
   if (!buffer) {
     return -1;
@@ -963,7 +963,7 @@ FS_u32 FS__fat_findpath(int Idx, const char *pFullName, FS_FARCHARPTR *pFileName
   x = !FS__fat_checkunit(Idx, *pUnit);
   if (x) 
   {
-	  printf("\r\n fs xxxoo");
+	  LIBMCU_DEBUG(FS_DEBUG,("\r\n fs xxxoo"));
 	  return 0;
   }
   /* Setup pDirStart/dsize for root directory */
@@ -1053,14 +1053,14 @@ FS_FILE *FS__fat_fopen(const char *pFileName, const char *pMode, FS_FILE *pFile)
   char realname[12];
   int lexp_a;
   int lexp_b;
-  printf("\r\n FS__fat_fopen");
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n FS__fat_fopen"));
   if (!pFile) {
     return 0;  /* Not a valid pointer to an FS_FILE structure*/
   }
   dsize = FS__fat_findpath(pFile->dev_index, pFileName, &fname, &unit, &dstart);
   if (dsize == 0) 
   {
-		printf("\r\n Directory not found");
+		LIBMCU_DEBUG(FS_DEBUG,("\r\n Directory not found"));
 		return 0;  /* Directory not found */
   }
   FS__lb_ioctl(FS__pDevInfo[pFile->dev_index].devdriver, unit, FS_CMD_INC_BUSYCNT, 0, (void*)0);  /* Turn on busy signal */

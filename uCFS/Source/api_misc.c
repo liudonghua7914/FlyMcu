@@ -28,6 +28,9 @@ None.
 **********************************************************************
 */
 
+
+
+
 #include "fs_port.h"
 #ifndef FS_FARCHARPTR
   #define FS_FARCHARPTR char *
@@ -203,7 +206,7 @@ FS_FILE *FS_FOpen(const char *pFileName, const char *pMode) {
   idx = FS__find_fsl(pFileName, &s);
   if (idx < 0)
   {
-	  printf("r\n  Device not found");
+	  LIBMCU_DEBUG(FS_DEBUG,("r\n  Device not found"));
 	  return 0;  /* Device not found */
   }
   if (FS__pDevInfo[idx].fs_ptr->fsl_fopen) {

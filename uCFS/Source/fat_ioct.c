@@ -535,7 +535,7 @@ static int _FS_FAT_AutoFormat(int Idx, FS_u32 Unit) {
   int i;
   unsigned char secperclust;
   char fsystype;
-  printf("\r\n _FS_FAT_AutoFormat->>"); 	 
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n _FS_FAT_AutoFormat->>")); 	 
   /* Get info from device */
   devinfo.hiddennum = 0x00001111UL;
   devinfo.headnum   = 0x00002222UL;
@@ -693,7 +693,7 @@ static int _FS_fat_GetTotalFree(int Idx, FS_u32 Unit, FS_DISKFREE_T *pDiskData) 
   unsigned char c;
   unsigned char d;
 #endif
-  printf("\r\n _FS_fat_GetTotalFree->>"); 	 
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n _FS_fat_GetTotalFree->>")); 	 
   if (!pDiskData) {
     return -1;  /* No pointer to a FS_DISKFREE_T structure */
   }
@@ -865,7 +865,7 @@ int FS__fat_ioctl(int Idx, FS_u32 Unit, FS_i32 Cmd, FS_i32 Aux, void *pBuffer) {
 #endif
 	
 	
-  printf("\r\n FS__fat_ioctl");
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n FS__fat_ioctl"));
   FS__lb_ioctl(FS__pDevInfo[Idx].devdriver, Unit, FS_CMD_INC_BUSYCNT, 0, (void*)0);  /* Turn on busy signal */
 #if (FS_FAT_NOFORMAT==0)
   if (Cmd == FS_CMD_FORMAT_MEDIA) {
@@ -961,7 +961,7 @@ int FS__fat_ioctl(int Idx, FS_u32 Unit, FS_i32 Cmd, FS_i32 Aux, void *pBuffer) {
       return -1;
     }
     i = FS__lb_status(FS__pDevInfo[Idx].devdriver, Unit);
-	printf("\r\n fat_ioctl ->FS__lb_status");
+	LIBMCU_DEBUG(FS_DEBUG,("\r\n fat_ioctl ->FS__lb_status"));
     if (i >= 0) {
       if (Cmd == FS_CMD_READ_SECTOR) {
         x = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, Aux, pBuffer);

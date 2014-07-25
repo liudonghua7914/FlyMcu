@@ -81,7 +81,6 @@ void printf_w(const char *format, ...)
 		OSSemPost(demoInfo.pDemoDebugEvent);
 	}
 }
-
 /***************************************************************************************************************************
 **函数名称:	 	DemoEEPROM
 **函数功能:	 	
@@ -115,7 +114,6 @@ void DemofifoInit(void)
 ***************************************************************************************************************************/
 void ipcDemoDebugInit(void)
 {
-	
 	DemoDebugTaskCreate();
 	ResetUserTimer(&demoInfo.DemoDebugTickTime);
 	demoInfo.pDemoDebugEvent = OSSemCreate(0);

@@ -18,6 +18,18 @@
 #include "lpc17xx_rtc.h"
 #include "IAP.h"
 
+extern void printf_w(const char *format, ...);
+
+#define 	MCU_PLATFORM_DIAG(x)	printf_w x 
+
+
+#define LIBMCU_DEBUG(debug,message)	do\
+									{\
+										if(debug)\
+										{\
+											MCU_PLATFORM_DIAG(message);\
+										}\
+									}while(0)\
 
 
 
@@ -33,6 +45,7 @@
 #define		SYSTEM_DEBUG		LIBMCU_DBG_ON
 #define		ETHERNTE_DEBUG		LIBMCU_DBG_ON	
 #define		MMC_DEBUG			LIBMCU_DBG_ON
+#define		FS_DEBUG			LIBMCU_DBG_ON
 #define		INTER_DEBUG			LIBMCU_DBG_ON
 
 

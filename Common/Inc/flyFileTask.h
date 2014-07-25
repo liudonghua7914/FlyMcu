@@ -4,7 +4,7 @@
 #include "def.h"
 #include "includes.h"
 #include "fs_include.h"
-#define  		FLYFILE_TASK_START_STK_SIZE          100
+#define  		FLYFILE_TASK_START_STK_SIZE          200
 
 
 

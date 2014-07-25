@@ -884,11 +884,6 @@
               <FilePath>..\..\Common\Src\demoDebugTask.c</FilePath>
             </File>
             <File>
-              <FileName>flyeepromTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Common\Src\flyeepromTask.c</FilePath>
-            </File>
-            <File>
               <FileName>flyFileTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Common\Src\flyFileTask.c</FilePath>

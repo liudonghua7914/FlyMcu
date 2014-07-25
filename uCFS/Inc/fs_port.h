@@ -27,6 +27,7 @@ None.
 #ifndef _FS_PORT_H_
 #define _FS_PORT_H_
 
+#include "interface.h"
 /*********************************************************************
 *
 *             define global data types

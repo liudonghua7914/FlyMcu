@@ -367,7 +367,6 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 		}
 		while ((dataCfg->tx_cnt != dataCfg->length) || (dataCfg->rx_cnt != dataCfg->length))
 		{
-			//printf("\r\n xxdd");
 			if ((SSPx->SR & SSP_SR_TNF) && (dataCfg->tx_cnt != dataCfg->length))
 			{
 				// Write data to buffer
@@ -432,8 +431,7 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 				}
 			}
 			
-			//printf("\r\n tx_cnt %d ",dataCfg->tx_cnt);
-			//printf("\r\n rx_cnt %d ",dataCfg->rx_cnt);
+			
 		}
 
 		// save status
@@ -441,17 +439,17 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 
 		if (dataCfg->tx_data != NULL)
 		{
-			//printf("\r\n  retrun tx_cnt %d ",dataCfg->tx_cnt);
+			
 			return dataCfg->tx_cnt;
 		} 
 		else if (dataCfg->rx_data != NULL)
 		{
-			//printf("\r\n  retrun rx_cnt %d ",dataCfg->rx_cnt);
+			
 			return dataCfg->rx_cnt;
 		} 
 		else 
 		{
-			//printf("\r\n  retrun 0");
+		
 			return (0);
 		}
 		

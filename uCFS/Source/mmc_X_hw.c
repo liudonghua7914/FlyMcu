@@ -560,14 +560,14 @@ BOOL FS_MMC_FS_MMC_HW_X_ActiveCard(FS_u32 id)
 	BOOL bRes = FALSE;
 	BYTE Res = 0XFF;
 	FS_MMC_HW_X_ReadWrite(id,SendBuf,6,RecBuf,5);	
-	printf("\r\n RecBuf[0] = %x",RecBuf[0]);
-	printf("\r\n RecBuf[1] = %x",RecBuf[1]);
-	printf("\r\n RecBuf[2] = %x",RecBuf[2]);
-	printf("\r\n RecBuf[3] = %x",RecBuf[3]);
-	printf("\r\n RecBuf[4] = %x",RecBuf[4]);
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n RecBuf[0] = %x",RecBuf[0]));
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n RecBuf[1] = %x",RecBuf[1]));
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n RecBuf[2] = %x",RecBuf[2]));
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n RecBuf[3] = %x",RecBuf[3]));
+	LIBMCU_DEBUG(MMC_DEBUG,("\r\n RecBuf[4] = %x",RecBuf[4]));
 	if(0X01 == RecBuf[0])
 	{
-		printf("\r\n SD V2.0 ");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n SD V2.0 "));
 		SDCardType = eSDV2_0;
 		if(FS_MMC_FS_MMC_HW_X_CheckType(id))
 		{
@@ -577,11 +577,11 @@ BOOL FS_MMC_FS_MMC_HW_X_ActiveCard(FS_u32 id)
 	}
 	else
 	{
-		printf("\r\n SD V1.0 ");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n SD V1.0 "));
 		SDCardType = eSDV1_0; 
 		if(FS_MMC_FS_MMC_HW_X_CheckType(id))
 		{	
-			printf("\r\n SD Card ");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n SD Card "));
 			bRes =  TRUE;
 		}
 		else
@@ -593,7 +593,7 @@ BOOL FS_MMC_FS_MMC_HW_X_ActiveCard(FS_u32 id)
 				FS_MMC_HW_X_ReadWrite(id,SendBuf,6,&Res,1);	
 				if(0X00 == Res)
 				{
-					printf("\r\n MMC Card ");
+					LIBMCU_DEBUG(MMC_DEBUG,("\r\n MMC Card "));
 					bRes = TRUE;
 					SDCardType = eSDV1_0_MMC;
 					break;
@@ -620,17 +620,17 @@ BOOL FS_MMC_FS_MMC_HW_X_ChcekOCR(FS_u32 id)
 	if(0X00 == RecBuf[0])
 	{
 		bRes = TRUE;
-		printf("\r\n OCR[0] = %x",RecBuf[0]);
-		printf("\r\n OCR[1] = %x",RecBuf[1]);
-		printf("\r\n OCR[2] = %x",RecBuf[2]);
-		printf("\r\n OCR[3] = %x",RecBuf[3]);
-		printf("\r\n OCR[4] = %x",RecBuf[4]);
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n OCR[0] = %x",RecBuf[0]));
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n OCR[1] = %x",RecBuf[1]));
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n OCR[2] = %x",RecBuf[2]));
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n OCR[3] = %x",RecBuf[3]));
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n OCR[4] = %x",RecBuf[4]));
 	}
 	
 	if(RecBuf[1] & 0X40)
 	{
 		SDCardType = eSDV2_0_SDHC;
-		printf("\r\n SDHC ");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n SDHC "));
 	}
 	return bRes;
 }
@@ -678,7 +678,7 @@ BOOL FS_MMC_FS_MMC_HW_X_SetBlockSize(FS_u32 id,FS_u32 Size)
 	FS_MMC_HW_X_ReadWrite(id,SendBuf,6,&Res,1);
 	if(!Res)
 	{
-		printf("\r\n Set Block Size OK");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n Set Block Size OK"));
 		bRes = TRUE;
 	}
 	return bRes;
@@ -699,11 +699,11 @@ BOOL FS_MMC_FS_MMC_HW_X_ChcekCSD(FS_u32 id)
 	FS_MMC_HW_X_ReadWrite(id,SendBuf,6,RecBuf,len);//ps: crc 值可以不管,但必须把crc给读出来,不然后面的操作会出问题
 	if((0X00 == RecBuf[0]) && (0XFE == RecBuf[1]))
 	{
-		printf("\r\n CID: ");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n CID: "));
 		bRes = TRUE;
 		for(i = 1;i <= len - 2;i++)
 		{
-			printf("%x ",RecBuf[i]);
+			LIBMCU_DEBUG(MMC_DEBUG,("%x ",RecBuf[i]));
 		}
 	}
 	return bRes;
@@ -724,11 +724,11 @@ BOOL FS_MMC_FS_MMC_HW_X_ChcekCID(FS_u32 id)
 	FS_MMC_HW_X_ReadWrite(id,SendBuf,6,RecBuf,len);//ps: crc 值可以不管,但必须把crc给读出来,不然后面的操作会出问题
 	if((0X00 == RecBuf[0]) && (0XFE == RecBuf[1]))
 	{
-		printf("\r\n CID: ");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n CID: "));
 		bRes = TRUE;
 		for(i = 1;i <= len - 2;i++)
 		{
-			printf("%x ",RecBuf[i]);
+			LIBMCU_DEBUG(MMC_DEBUG,("%x ",RecBuf[i]));
 		}
 	}
 	return bRes;
@@ -769,7 +769,7 @@ void FS_MMC_HW_X_Init(void)
 	if(FALSE == bRes)
 	{
 		FS_MMC_HW_X_PowerOff(ID0);
-		printf("\r\n FS MMC Reset Fail");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC Reset Fail"));
 	}
 	/*********************3. 激活SD卡 **************************/
 	if(bRes)
@@ -778,7 +778,7 @@ void FS_MMC_HW_X_Init(void)
 		if(!bRes)
 		{
 			FS_MMC_HW_X_PowerOff(ID0);
-			printf("\r\n FS MMC ACTIVE Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC ACTIVE Fail"));
 		}
 	}
 	/***********************4. 查询OCR**************************/
@@ -787,7 +787,7 @@ void FS_MMC_HW_X_Init(void)
 		bRes = FS_MMC_FS_MMC_HW_X_ChcekOCR(ID0);
 		if(!bRes)
 		{
-			printf("\r\n FS MMC CHECK OCR Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC CHECK OCR Fail"));
 		}
 	}
 	/***********************5. 是否使用CRC***********************/
@@ -796,7 +796,7 @@ void FS_MMC_HW_X_Init(void)
 		bRes = FS_MMC_FS_MMC_HW_X_SetCRC(ID0,FALSE);
 		if(!bRes)
 		{
-			printf("\r\n FS MMC CHECK SET CRC Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC CHECK SET CRC Fail"));
 		}
 	}
 	/**********************6. 设置读写数据块长*******************/
@@ -805,7 +805,7 @@ void FS_MMC_HW_X_Init(void)
 		bRes = FS_MMC_FS_MMC_HW_X_SetBlockSize(ID0,512);
 		if(!bRes)
 		{
-			printf("\r\n FS MMC CHECK SET BLOCK Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC CHECK SET BLOCK Fail"));
 		}
 	}
 	/*********************7. 读取CID*****************************/
@@ -814,7 +814,7 @@ void FS_MMC_HW_X_Init(void)
 		bRes = FS_MMC_FS_MMC_HW_X_ChcekCID(ID0);
 		if(!bRes)
 		{
-			printf("\r\n FS MMC ChcekCID Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC ChcekCID Fail"));
 		}
 	}
 	/*********************8. 读取CSD*****************************/
@@ -823,13 +823,13 @@ void FS_MMC_HW_X_Init(void)
 		bRes = FS_MMC_FS_MMC_HW_X_ChcekCSD(ID0);
 		if(!bRes)
 		{
-			printf("\r\n FS MMC ChcekCSD Fail");
+			LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC ChcekCSD Fail"));
 		}
 	}
 	
 	if(bRes)
 	{
-		printf("\r\n FS MMC Init OK");
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS MMC Init OK"));
 		FS_MMC_HW_X_ClockCard(ID0,SSP_1MHz);
 	}
 }
@@ -866,9 +866,9 @@ for(cnt = 0;cnt < 512;cnt++)
 {
 	if(!(cnt % 16))
 	{
-		printf("\r\n %08x :",cnt);
+		LIBMCU_DEBUG(MMC_DEBUG,("\r\n %08x :",cnt));
 	}
-	printf("%x ",buf[cnt]);
+	LIBMCU_DEBUG(MMC_DEBUG,("%x ",buf[cnt]));
 }
 #endif
 

@@ -12,18 +12,6 @@
 	#define		DEMO_EXTERN	  	
 #endif
 
-#define 	MCU_PLATFORM_DIAG(x)	printf_w x 
-
-
-#define LIBMCU_DEBUG(debug,message)	do\
-									{\
-										if(debug)\
-										{\
-											MCU_PLATFORM_DIAG(message);\
-										}\
-									}while(0)\
-
-
 
 	
 typedef unsigned char  DataType;	
@@ -33,7 +21,7 @@ typedef struct
 	BYTE DemoCount;
 	UINT32 DemoDebugTickTime;
 	OS_EVENT *pDemoDebugEvent;
-	DataType DemoDebug[512];
+	DataType DemoDebug[2048];
 }T_DEMO_INFO;	
 	
 DEMO_EXTERN T_DEMO_INFO demoInfo;

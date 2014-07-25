@@ -113,7 +113,7 @@ static int _FS_ReadBPB(int Idx, FS_u32 Unit) {
   buffer = (unsigned char*)FS__fat_malloc(FS_FAT_SEC_SIZE);
   if (!buffer) 
   {
-	printf("\r\n malloc fail");
+	LIBMCU_DEBUG(FS_DEBUG,("\r\n malloc fail"));
     return -1;
   }
   err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, 0, (void*)buffer);
@@ -704,7 +704,7 @@ int FS__fat_checkunit(int Idx, FS_u32 Unit) {
   int err;
   int status;
   int lexp;
-  printf("\r\n FS__fat_checkunit %d",Unit);
+  LIBMCU_DEBUG(FS_DEBUG,("\r\n FS__fat_checkunit %d",Unit));
   status = FS__lb_status(FS__pDevInfo[Idx].devdriver, Unit);
   if (status < 0) {
     return 0;
@@ -712,7 +712,7 @@ int FS__fat_checkunit(int Idx, FS_u32 Unit) {
   if (status == FS_LBL_MEDIACHANGED) {
     /* Mount new volume */
     err = _FS_ReadBPB(Idx, Unit);
-	printf("\r\n fs err %d",err);
+	LIBMCU_DEBUG(FS_DEBUG,("\r\n fs err %d",err));
     if (err < 0) {
       return 0;
     }
@@ -723,20 +723,20 @@ int FS__fat_checkunit(int Idx, FS_u32 Unit) {
     lexp = (err < 0);
     lexp = lexp || (FS__FAT_aBPBUnit[Idx][Unit].Signature != 0xaa55);
     if (lexp) {
-		 printf("\r\n fs 0 ");
+		 LIBMCU_DEBUG(FS_DEBUG,("\r\n fs 0 "));
       return 0;
     }
   }
   if (FS__FAT_aBPBUnit[Idx][Unit].NumFATs != 2) 
   {
-    printf("\r\n fs 1 ");
+    LIBMCU_DEBUG(FS_DEBUG,("\r\n fs 1 "));
 	  return 0;  /* Only 2 FATs are supported */
   }
   if (FS__FAT_aBPBUnit[Idx][Unit].FATSz16 == 0) 
   {
     if (FS__FAT_aBPBUnit[Idx][Unit].ExtFlags & 0x0080) 
 	{
-         printf("\r\n fs 2");
+         LIBMCU_DEBUG(FS_DEBUG,("\r\n fs 2"));
 		return 0;  /* Only mirroring at runtime supported */
     }
   }

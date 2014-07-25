@@ -247,7 +247,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	u8_t tmp;
 	cur_prio += prio;
 	tmp = cur_prio - LWIP_THREAD_TASK_PRIO_MIN;
-	printf("\r\n thread name %s prio %d cur_prio %d ",name,prio,cur_prio);
+	
 	if(cur_prio <= LWIP_THREAD_TASK_PRIO_MAX)
 	{
 		err = OSTaskCreate(thread,&arg,LWIP_THREAD_TASK[tmp],cur_prio);

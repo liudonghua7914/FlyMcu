@@ -33,7 +33,7 @@ static int FsDevStatus(FS_u32 Unit)
 	int x;
 	int i = 0;
 	static int init =0;
-//	printf("\r\n FsDevStatus id: %d",Unit);
+//	LIBMCU_DEBUG(FS_DEBUG,("\r\n FsDevStatus id: %d",Unit));
 	
 	if(!init)
 	{
@@ -47,13 +47,13 @@ static int FsDevStatus(FS_u32 Unit)
 	
 	if(Unit >= FS_MMC_MAXUNIT)
 	{
-		printf("\r\n NO MMC/SD Card Found!!!");
+		LIBMCU_DEBUG(FS_DEBUG,("\r\n NO MMC/SD Card Found!!!"));
 		return -1;
 	}
 	a = FS_MMC_HW_X_DetectStatus(Unit);
 	if(a)
 	{
-		printf("\r\n No Card in Reader");
+		LIBMCU_DEBUG(FS_DEBUG,("\r\n No Card in Reader"));
 		return -1;
 	}
 	a = _FS_mmc_diskchange[Unit];
@@ -64,7 +64,7 @@ static int FsDevStatus(FS_u32 Unit)
 		x =  FS__MMC_ReadSector(Unit, 0, (unsigned char*)&_FS_mmc_mbrbuffer[0]);
 		if(x != 0)
 		{
-			printf("\r\n FS__MMC_ReadSector fail");
+			LIBMCU_DEBUG(FS_DEBUG,("\r\n FS__MMC_ReadSector fail"));
 			return -1;
 		}
 		 /* Calculate start sector of the first partition */
@@ -85,7 +85,7 @@ static int FsDevStatus(FS_u32 Unit)
 static int FsDevRead(FS_u32 Unit, FS_u32 Sector, void *buffer)
 {
 	int x;
-//	printf("\r\n FsDevRead Unit: %d Sector: %d",Unit,Sector);
+//	LIBMCU_DEBUG(FS_DEBUG,("\r\n FsDevRead Unit: %d Sector: %d",Unit,Sector));
 	if(Unit >= FS_MMC_MAXUNIT)
 	{
 		return -1;
@@ -106,7 +106,7 @@ static int FsDevRead(FS_u32 Unit, FS_u32 Sector, void *buffer)
 static int FsDevWrite(FS_u32 Unit, FS_u32 Sector, void *pBuffer)
 {
 	int x;
-//	printf("\r\n FsDevWrite Unit: %d Sector: %d",Unit,Sector);
+//	LIBMCU_DEBUG(FS_DEBUG,("\r\n FsDevWrite Unit: %d Sector: %d",Unit,Sector));
 
   
 	if (Unit >= FS_MMC_MAXUNIT)
@@ -131,7 +131,7 @@ static int FsDevIoctl(FS_u32 Unit, FS_i32 Cmd, FS_i32 Aux, void *pBuffer)
 	 FS_u32 *info;
 	int x;
 	char a;
-//	printf("\r\n FsDevIoctl Unit: %d Cmd: %x Aux: %x",Unit,Cmd,Aux);
+//	LIBMCU_DEBUG(FS_DEBUG,("\r\n FsDevIoctl Unit: %d Cmd: %x Aux: %x",Unit,Cmd,Aux));
 	Aux = Aux;  /* Get rid of compiler warning */
 	if (Unit >= FS_MMC_MAXUNIT) 
 	{

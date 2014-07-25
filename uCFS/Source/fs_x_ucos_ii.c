@@ -199,9 +199,10 @@ void FS_X_OS_UnlockDirHandle (void)
 void FS_X_OS_LockDirOp (FS_DIR *dirp)
 {
     INT8U  err;
-
-
-    OSSemPend(FS_SemDirOps, 0, &err);
+	if(NULL != FS_SemDirOps)
+	{
+		OSSemPend(FS_SemDirOps, 0, &err);
+	}
 }
 #endif
 

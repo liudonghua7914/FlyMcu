@@ -11,7 +11,7 @@ void ipcExchangeEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)
 		ipcEventProcflyFile(enumWhatEvent,lPara,p,length);
 		ipcEventProcFlylyEthernet(enumWhatEvent,lPara,p,length);
 		ipcEventProcDemoDebug(enumWhatEvent,lPara,p,length);
-		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
+//		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
 	}
 	else if (enumWhatEvent > EVENT_GLOBAL_FLY_SYSTEM_MIN && enumWhatEvent < EVENT_GLOBAL_FLY_SYSTEM_MAX)
 	{
@@ -31,7 +31,7 @@ void ipcExchangeEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)
 	}
 	else if (enumWhatEvent > EVENT_GLOBAL_FLY_EEPROM_MIN && enumWhatEvent < EVENT_GLOBAL_FLY_EEPROM_MAX)
 	{
-		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
+//		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
 	}
 }
 

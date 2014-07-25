@@ -204,12 +204,12 @@ int main(void)
 {
 	IntDisAll();
 	chipInit();
-	OSInit();
-	TaskInit();
-	if(FS_Init() < 0)
+	OSInit();	
+	if(FS_Init() < 0)//要在TaskInit前面初始化
 	{
 		LIBMCU_DEBUG(MAIN_DEBUG,("\r\n FS_Init Fail"));
 	}
+	TaskInit();
    	OSStart();
 	return 0;
 }
