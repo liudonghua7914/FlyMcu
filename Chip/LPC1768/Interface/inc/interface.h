@@ -312,7 +312,7 @@ INTERFACE_GLOBAL void I2CStop(void);
 INTERFACE_GLOBAL BOOL WaitI2CACK(void);
 INTERFACE_GLOBAL BYTE I2CReadByte(void);
 INTERFACE_GLOBAL void I2CWriteByte(BYTE data);
-
+INTERFACE_GLOBAL void EMAC_IntStart(void);
 
 #endif
 

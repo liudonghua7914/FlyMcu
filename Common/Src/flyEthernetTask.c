@@ -14,7 +14,7 @@
 #define		NON_API		0
 #define		RAW_API		1
 #define		LWIP_API	2
-#define		WHAT_API	NON_API
+#define		WHAT_API	LWIP_API
 
 
 BYTE ip_addr[] = {192,168,8,100};
@@ -52,6 +52,7 @@ void ENET_IRQHandler(void)
 static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n client_connected"));
+	return ERR_OK;
 }
 /***************************************************************************************************************************
 **函数名称:	 	LwIP_TimeOutTask
@@ -80,6 +81,7 @@ err_t tcp_recv_back(void *arg, struct tcp_pcb *tpcb,struct pbuf *p, err_t err)
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
 	pbuf_free(p);
 	tcp_close(tpcb);
+	return ERR_OK;
 }
 /***************************************************************************************************************************
 **函数名称:	 	LwIP_Accept
@@ -173,9 +175,9 @@ void ipcFlyEthernetInit(void)
 	netif_add(&flyEhternetInfo.netif, &flyEhternetInfo.ipaddr, &flyEhternetInfo.netmask, &flyEhternetInfo.gw, NULL, ethernetif_init, ethernet_input);
 	netif_set_default(&flyEhternetInfo.netif);
 	netif_set_up(&flyEhternetInfo.netif);
-	
-	FlylyEthernetCreate();
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ipcFlyEthernetInit OK"));	
+	FlyEthernetCreate();
+	LwipTaskCreate();
+	EMAC_IntStart();
 }
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
@@ -247,8 +249,6 @@ void lwipServiceInit(void)
 	}
 	#endif
 }
-
-#if 1
 /***************************************************************************************************************************
 **函数名称:	 	FlyEthernetTask
 **函数功能:	 	
@@ -258,7 +258,6 @@ void lwipServiceInit(void)
 void FlyEthernetTask(void *arg)
 {
 	INT8U err;
-	lwipServiceInit();
 	while(1)
 	{
 		OSSemPend(flyEhternetInfo.LwIPSem,500,&err);
@@ -267,24 +266,15 @@ void FlyEthernetTask(void *arg)
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n err = %d ",err));
 		}
 		ethernetif_input(&flyEhternetInfo.netif);
-		
-		#if(LWIP_API == WHAT_API)
-		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
-			netbuf_delete(flyEhternetInfo.pNetbuf);       
-		}
-		
-		#endif
 	}
 }
 /***************************************************************************************************************************
-**函数名称:	 	FlylyEthernetCreate
+**函数名称:	 	FlyEthernetCreate
 **函数功能:	 	
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-void FlylyEthernetCreate(void)
+void FlyEthernetCreate(void)
 {
 	INT8U Res;
 	Res = OSTaskCreate(FlyEthernetTask, 								//执行函数
@@ -297,4 +287,43 @@ void FlylyEthernetCreate(void)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Res = %d",Res));
 	}
 }
-#endif
+/***************************************************************************************************************************
+**函数名称:	 	LwipTaskCreate
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void LwipTask(void *arg)
+{
+	lwipServiceInit();
+	while(1)
+	{
+		#if(LWIP_API == WHAT_API)
+		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
+			netbuf_delete(flyEhternetInfo.pNetbuf);       
+		}
+		#endif
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	LwipTaskCreate
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void LwipTaskCreate(void)
+{
+	INT8U Res;
+	Res = OSTaskCreate(LwipTask, 										//执行函数
+				 NULL,	  												//带入的参数
+				 &GstkLwip[LWIP_TASK_START_STK_SIZE-1],			//堆栈由高地址往底地址增长
+				 (INT8U)PRIO_LWIP										//任务优先级
+				 );
+	if(OS_NO_ERR != Res)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Res = %d",Res));
+	}	
+}
+	

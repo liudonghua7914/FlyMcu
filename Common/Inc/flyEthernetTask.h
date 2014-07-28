@@ -22,6 +22,7 @@
 #endif
 
 
+#define  		LWIP_TASK_START_STK_SIZE         		200
 #define  		FLYETHERNET_TASK_START_STK_SIZE         250
 #define 		RECSIZE			256
 
@@ -56,7 +57,9 @@ typedef struct
 
 FLYETHERNET_GLOBAL T_FLYEHTERNET_INFO flyEhternetInfo;
 FLYETHERNET_GLOBAL UINT GstkFlyEthernet[FLYETHERNET_TASK_START_STK_SIZE];	
-FLYETHERNET_GLOBAL void FlylyEthernetCreate(void);
+FLYETHERNET_GLOBAL UINT GstkLwip[FLYETHERNET_TASK_START_STK_SIZE];
+FLYETHERNET_GLOBAL void FlyEthernetCreate(void);
+FLYETHERNET_GLOBAL void LwipTaskCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
 
 #endif
