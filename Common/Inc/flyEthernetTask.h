@@ -46,8 +46,10 @@ typedef struct
 	struct udp_pcb *pUpdpcb;
 	struct tcp_pcb *pTcp;
 	
+	struct netconn *pNetconn;
+	struct netconn *pNewnetconn;
 	struct netif netif;
-	
+	struct netbuf *pNetbuf;
 	OS_EVENT *LwIPSem;
 }T_FLYEHTERNET_INFO;	
 

@@ -6,10 +6,10 @@
 
 
 
-static void *ArrayOfMsg[MAX_QUEUE_ENTRIES];
-
+static void *ArrayOfMsg[MAX_Q][MAX_QUEUE_ENTRIES];
 OS_STK LWIP_THREAD_TASK[LWIP_THREAD_TASK_MAX][LWIP_THREAD_TASK_STACK];
 u8_t cur_prio = 0;
+u8_t cur_q = 0;
 /***************************************************************************************************************************
 **函数名称:	 	sys_init
 **函数功能:	 	
@@ -29,10 +29,12 @@ void sys_init(void)
 err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 {
 	err_t Res = ERR_VAL;
-	sem = NULL;
-	sem = OSSemCreate(count);
-	if(NULL != sem)
+	sys_sem_t tm_sem;
+	tm_sem = OSSemCreate(count);
+	
+	if(NULL != tm_sem)
 	{
+		*sem = tm_sem;
 		Res = ERR_OK;
 	}
 	return Res;
@@ -46,7 +48,8 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 void sys_sem_free(sys_sem_t *sem)
 {
 	INT8U Res;
-	OSSemDel(sem,OS_DEL_NO_PEND,&Res);
+	sys_sem_t tm_sem = *sem;
+	OSSemDel(tm_sem,OS_DEL_NO_PEND,&Res);
 }
 /***************************************************************************************************************************
 **函数名称:	 	sys_sem_signal
@@ -56,9 +59,10 @@ void sys_sem_free(sys_sem_t *sem)
 ***************************************************************************************************************************/
 void sys_sem_signal(sys_sem_t *sem)
 {
-	if(NULL != sem)
+	sys_sem_t tm_sem = *sem;
+	if(NULL != tm_sem)
 	{
-		OSSemPost(sem);
+		OSSemPost(tm_sem);
 	}
 }
 /***************************************************************************************************************************
@@ -70,7 +74,8 @@ void sys_sem_signal(sys_sem_t *sem)
 u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 {
 	INT8U err;
-	OSSemPend(sem,timeout,&err);
+	sys_sem_t tm_sem = *sem;
+	OSSemPend(tm_sem,timeout,&err);
 	return err;
 }
 /***************************************************************************************************************************
@@ -82,7 +87,8 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 int sys_sem_valid(sys_sem_t *sem)
 {
 	int Res = 0;
-	if(NULL != sem)
+	sys_sem_t tm_sem = *sem;
+	if(NULL != tm_sem)
 	{
 		Res = 1;
 	}
@@ -96,7 +102,8 @@ int sys_sem_valid(sys_sem_t *sem)
 ***************************************************************************************************************************/
 void sys_sem_set_invalid(sys_sem_t *sem)
 {
-	sem = NULL;
+	sys_sem_t tm_sem = *sem;
+	tm_sem = NULL;
 }
 /***************************************************************************************************************************
 **函数名称:	 	sys_mbox_new
@@ -106,9 +113,24 @@ void sys_sem_set_invalid(sys_sem_t *sem)
 ***************************************************************************************************************************/
 err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
-	err_t err = ERR_VAL;
-	mbox = NULL;
-	mbox = OSQCreate(&ArrayOfMsg[0],size);
+	err_t err = ERR_MEM;
+	sys_mbox_t m_box;
+	m_box = OSQCreate(&ArrayOfMsg[cur_q][0],size);
+	
+	if(NULL == m_box)
+	{
+		return ERR_MEM;
+	}
+	else
+	{
+		*mbox = m_box;
+	}
+	
+	if(cur_q++ >= MAX_Q)
+	{
+		err = ERR_MEM;
+	}
+	
 	if(NULL != err)
 	{
 		err = ERR_OK;
@@ -124,7 +146,9 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 void sys_mbox_free(sys_mbox_t *mbox)
 {
 	INT8U err;
-	OSQDel(mbox,OS_DEL_NO_PEND,&err);
+	sys_mbox_t m_box = *mbox;
+	OSQDel(m_box,OS_DEL_NO_PEND,&err);
+	*mbox = NULL;
 }
 /***************************************************************************************************************************
 **函数名称:	 	sys_mbox_post
@@ -134,9 +158,10 @@ void sys_mbox_free(sys_mbox_t *mbox)
 ***************************************************************************************************************************/
 void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
+	sys_mbox_t m_box = *mbox;
 	if(NULL != msg)
 	{
-		OSQPost(mbox,msg);
+		OSQPost(m_box,msg);
 	}
 }
 /***************************************************************************************************************************
@@ -148,10 +173,10 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 {
 	err_t err = ERR_OK;
-
+	sys_mbox_t m_box = *mbox;
 	if(NULL != msg)
 	{
-		err = OSMboxPost(mbox,msg);
+		err = OSMboxPost(m_box,msg);
 		if(OS_NO_ERR != err)
 		{
 			err = ERR_MEM;
@@ -170,7 +195,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 	INT8U err;
 	u32_t ucos_timeout,timeout_new;
 	void *temp = NULL;
-	
+	sys_mbox_t m_box = *mbox;
 	if(timeout != 0)
 	{
 		ucos_timeout = (timeout * OS_TICKS_PER_SEC) / 1000;
@@ -185,7 +210,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 	}
 	
 	timeout = OSTimeGet();
-	temp = OSQPend(mbox,(u16_t)ucos_timeout,&err);
+	temp = OSQPend(m_box,(u16_t)ucos_timeout,&err);
 	if(msg != NULL)
 	{
 		*msg = temp;
@@ -219,7 +244,8 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
 int sys_mbox_valid(sys_mbox_t *mbox)
 {
 	int err = 0;
-	if(NULL != mbox)
+	sys_mbox_t m_box = *mbox;
+	if(NULL != m_box)
 	{
 		err = 1;
 	}

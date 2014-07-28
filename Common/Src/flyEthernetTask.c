@@ -11,6 +11,12 @@
 #include "Ethernetif.h"
 #include "Etharp.h"
 
+#define		NON_API		0
+#define		RAW_API		1
+#define		LWIP_API	2
+#define		WHAT_API	NON_API
+
+
 BYTE ip_addr[] = {192,168,8,100};
 BYTE gw_addr[] = {192, 168, 1, 1};
 BYTE netmask[] = { 255, 255, 0, 0};	
@@ -45,9 +51,8 @@ void ENET_IRQHandler(void)
 ***************************************************************************************************************************/
 static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
-
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n client_connected"));
 }
-
 /***************************************************************************************************************************
 **函数名称:	 	LwIP_TimeOutTask
 **函数功能:	 	
@@ -58,6 +63,24 @@ void LwIP_TimeOutTask(void *arg)
 {
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_TimeOutTask %d ", OSTimeGet()));
 }
+
+/***************************************************************************************************************************
+**函数名称:	 	tcp_recv_back
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+err_t tcp_recv_back(void *arg, struct tcp_pcb *tpcb,struct pbuf *p, err_t err)
+{
+	UINT16 len;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_recv_back"));
+	
+	len = p->len + p->tot_len;
+	
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
+	pbuf_free(p);
+	tcp_close(tpcb);
+}
 /***************************************************************************************************************************
 **函数名称:	 	LwIP_Accept
 **函数功能:	 	
@@ -67,7 +90,9 @@ void LwIP_TimeOutTask(void *arg)
 err_t LwIP_Accept(void *arg, struct tcp_pcb *newpcb, err_t err)
 {
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_Accept"));
-	return 0;
+	tcp_setprio(newpcb,TCP_PRIO_MIN);
+	tcp_recv(newpcb,tcp_recv_back);
+	return ERR_OK;
 }
 /***************************************************************************************************************************
 **函数名称:	 	ip_input
@@ -149,45 +174,6 @@ void ipcFlyEthernetInit(void)
 	netif_set_default(&flyEhternetInfo.netif);
 	netif_set_up(&flyEhternetInfo.netif);
 	
-		
-	
-	flyEhternetInfo.pUpdpcb = udp_new();
-	if(NULL == flyEhternetInfo.pUpdpcb)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_new fail"));
-	}
-	
-	if(ERR_OK != udp_bind(flyEhternetInfo.pUpdpcb,IP_ADDR_ANY,80))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_bind fail"));
-	}
-	
-	if(ERR_OK != udp_connect(flyEhternetInfo.pUpdpcb,IP_ADDR_ANY,80))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n udp_connect fail"));
-	}
-	
-	flyEhternetInfo.pTcp = tcp_new();
-	if(NULL == flyEhternetInfo.pTcp)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_new fail"));
-	}
-	
-	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,80))//IP_ADDR_ANY
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_bind fail"));
-	}
-	
-	if(ERR_OK != tcp_connect(flyEhternetInfo.pTcp,&ip_computer,80,client_connected))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_connect fail"));
-	}
-	
-	
-	flyEhternetInfo.pTcp = tcp_listen(flyEhternetInfo.pTcp);
-	
-	tcp_accept(flyEhternetInfo.pTcp,LwIP_Accept);
-	
 	FlylyEthernetCreate();
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ipcFlyEthernetInit OK"));	
 }
@@ -214,6 +200,54 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 	}
 }
 
+
+/***************************************************************************************************************************
+**函数名称:	 	ipcEventProcFlylyEthernet
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void lwipServiceInit(void)
+{
+	#if(RAW_API == WHAT_API)
+	flyEhternetInfo.pTcp = tcp_new();
+	if(NULL == flyEhternetInfo.pTcp)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_new fail"));
+	}
+	
+	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,80))//IP_ADDR_ANY
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_bind fail"));
+	}
+	
+	flyEhternetInfo.pTcp = tcp_listen(flyEhternetInfo.pTcp);
+	
+	tcp_accept(flyEhternetInfo.pTcp,LwIP_Accept);
+	#elif(LWIP_API == WHAT_API)
+	flyEhternetInfo.pNetconn = netconn_new(NETCONN_TCP);
+	if(NULL == flyEhternetInfo.pNetconn)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_new fail"));
+	}
+	
+	if(ERR_OK != netconn_bind(flyEhternetInfo.pNetconn,IP_ADDR_ANY,80))
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_bind fail"));
+	}
+	
+	if(ERR_OK != netconn_listen(flyEhternetInfo.pNetconn))
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_listen fail"));
+	}
+	
+	if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
+	}
+	#endif
+}
+
 #if 1
 /***************************************************************************************************************************
 **函数名称:	 	FlyEthernetTask
@@ -224,18 +258,24 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 void FlyEthernetTask(void *arg)
 {
 	INT8U err;
+	lwipServiceInit();
 	while(1)
 	{
-	#if 1
 		OSSemPend(flyEhternetInfo.LwIPSem,500,&err);
 		if((OS_NO_ERR != err) && (OS_TIMEOUT != err))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n err = %d ",err));
 		}
-	#else
-		OSTimeDly(OS_TICKS_PER_SEC / 50);
-	#endif
 		ethernetif_input(&flyEhternetInfo.netif);
+		
+		#if(LWIP_API == WHAT_API)
+		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
+			netbuf_delete(flyEhternetInfo.pNetbuf);       
+		}
+		
+		#endif
 	}
 }
 /***************************************************************************************************************************

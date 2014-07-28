@@ -99,7 +99,7 @@
  * (this decreases performance)
  */
 #ifndef LWIP_MPU_COMPATIBLE
-#define LWIP_MPU_COMPATIBLE             0
+#define LWIP_MPU_COMPATIBLE             1
 #endif
 
 /*
@@ -2332,7 +2332,7 @@
  * SOCKETS_DEBUG: Enable debugging in sockets.c.
  */
 #ifndef SOCKETS_DEBUG
-#define SOCKETS_DEBUG                   LWIP_DBG_OFF
+#define SOCKETS_DEBUG                   LWIP_DBG_ON
 #endif
 
 /**
@@ -2360,7 +2360,7 @@
  * IP_DEBUG: Enable debugging for IP.
  */
 #ifndef IP_DEBUG
-#define IP_DEBUG                        LWIP_DBG_ON
+#define IP_DEBUG                        LWIP_DBG_OFF
 #endif
 
 /**
@@ -2409,7 +2409,7 @@
  * TCP_DEBUG: Enable debugging for TCP.
  */
 #ifndef TCP_DEBUG
-#define TCP_DEBUG                       LWIP_DBG_ON
+#define TCP_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**

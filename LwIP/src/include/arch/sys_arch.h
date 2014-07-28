@@ -15,16 +15,19 @@
 #define		LWIP_THREAD_TASK_PRIO_MIN	5	
 #define 	LWIP_THREAD_TASK_PRIO_MAX	7
 
-#define		LWIP_THREAD_TASK_MAX 		3
+
+
+#define		LWIP_THREAD_TASK_MAX 		4
 #define		LWIP_THREAD_TASK_STACK		200
 
-#define 	MAX_QUEUE_ENTRIES			50
+#define		MAX_Q						3
+#define 	MAX_QUEUE_ENTRIES			30
 
 #define sys_arch_mbox_tryfetch(mbox,msg)  sys_arch_mbox_fetch(mbox,msg,1)
 
-typedef OS_EVENT sys_sem_t;
-typedef OS_EVENT sys_mutex_t;
-typedef OS_EVENT sys_mbox_t;
+typedef OS_EVENT* sys_sem_t;
+typedef OS_EVENT* sys_mutex_t;
+typedef OS_EVENT* sys_mbox_t;
 typedef unsigned char sys_prot_t;
 typedef unsigned char sys_thread_t;
 

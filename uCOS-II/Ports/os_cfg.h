@@ -27,7 +27,7 @@
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_MEM_PART           1   /* Max. number of memory partitions ...                         */
                                        /* ... MUST be > 0                                              */
-#define OS_MAX_QS                 2   /* Max. number of queue control blocks in your application ...  */
+#define OS_MAX_QS                 4   /* Max. number of queue control blocks in your application ...  */
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_TASKS              15    /* Max. number of tasks in your application ...                 */
                                        /* ... MUST be >= 2                                             */

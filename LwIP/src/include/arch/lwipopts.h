@@ -34,7 +34,7 @@
 
 /* Prevent having to link sys_arch.c (we don't test the API layers in unit tests) */
 #define NO_SYS                          0
-#define LWIP_NETCONN                    0
+#define LWIP_NETCONN                    1
 #define LWIP_SOCKET                     0
 #define LWIP_COMPAT_MUTEX				1
 /* Enable DHCP to test it, disable UDP checksum to easier inject packets */
@@ -62,6 +62,9 @@
 #undef TCPIP_MBOX_SIZE
 #define TCPIP_MBOX_SIZE         MAX_QUEUE_ENTRIES
 
+
+#undef DEFAULT_ACCEPTMBOX_SIZE
+#define DEFAULT_ACCEPTMBOX_SIZE         MAX_QUEUE_ENTRIES
 
 /**
  * DEFAULT_TCP_RECVMBOX_SIZE: The mailbox size for the incoming packets on a
