@@ -21,18 +21,18 @@
 
 #include <os_cpu.h>
 
-#define OS_MAX_EVENTS             15    /* Max. number of event control blocks in your application ...  */
+#define OS_MAX_EVENTS             20    /* Max. number of event control blocks in your application ...  */
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_FLAGS              1    /* Max. number of Event Flag Groups    in your application ...  */
                                        /* ... MUST be > 0                                              */
 #define OS_MAX_MEM_PART           1   /* Max. number of memory partitions ...                         */
                                        /* ... MUST be > 0                                              */
-#define OS_MAX_QS                 4   /* Max. number of queue control blocks in your application ...  */
+#define OS_MAX_QS                 8   /* Max. number of queue control blocks in your application ...  */
                                        /* ... MUST be > 0                                              */
-#define OS_MAX_TASKS              15    /* Max. number of tasks in your application ...                 */
+#define OS_MAX_TASKS              20    /* Max. number of tasks in your application ...                 */
                                        /* ... MUST be >= 2                                             */
 
-#define OS_LOWEST_PRIO            15    /* Defines the lowest priority that can be assigned ...         */
+#define OS_LOWEST_PRIO            20    /* Defines the lowest priority that can be assigned ...         */
                                        /* ... MUST NEVER be higher than 63!                            */
 
 #define OS_TASK_IDLE_STK_SIZE    50    /* Idle task stack size (# of OS_STK wide entries)              */

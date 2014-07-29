@@ -8,6 +8,9 @@
 
 #include "..\..\Common\Src\fifo.c"
 
+#define		TASK_DEBUG	0
+
+
 T_Queue DemoQueue;
 T_Queue *pDemoQueue = &DemoQueue;
 
@@ -60,26 +63,28 @@ void printf_w(const char *format, ...)
 	
 	for(i = 0;i < m;i++)
 	{
-		#if 0
-			UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugTick[i], 1, BLOCKING);
-		#else
+		#if TASK_DEBUG
 			EnQueue(pDemoQueue,interfaceInfo.DebugTick[i]);
+		#else
+			UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&interfaceInfo.DebugTick[i], 1, BLOCKING);
 		#endif
 	}
 	
 	for(i = 0;i < n;i++)
 	{
-		#if 0
-			UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&ptr[i], 1, BLOCKING);
-		#else
+		#if TASK_DEBUG
 			EnQueue(pDemoQueue,ptr[i]);
+		#else
+			UART_Send((LPC_UART_TypeDef *)DEBUG_PORT, (uint8_t *)&ptr[i], 1, BLOCKING);
 		#endif
 	}
 	
+	#if TASK_DEBUG
 	if(NULL != demoInfo.pDemoDebugEvent)
 	{
 		OSSemPost(demoInfo.pDemoDebugEvent);
 	}
+	#endif
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	DemoEEPROM
@@ -196,8 +201,10 @@ void DemoDebugTask(void  *parg)
 		{
 			OSSemPend(demoInfo.pDemoDebugEvent,500,&err);
 		}	
-		DemoDebugMsg();
 		DemoDebugTick();
+		#if TASK_DEBUG
+		DemoDebugMsg();
+		#endif
 	}
 }
 /***************************************************************************************************************************

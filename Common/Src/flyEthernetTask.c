@@ -14,7 +14,7 @@
 #define		NON_API		0
 #define		RAW_API		1
 #define		LWIP_API	2
-#define		WHAT_API	LWIP_API
+#define		WHAT_API	NON_API
 
 
 BYTE ip_addr[] = {192,168,8,100};
@@ -243,10 +243,6 @@ void lwipServiceInit(void)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_listen fail"));
 	}
 	
-	if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
-	}
 	#endif
 }
 /***************************************************************************************************************************
@@ -299,11 +295,18 @@ void LwipTask(void *arg)
 	while(1)
 	{
 		#if(LWIP_API == WHAT_API)
+		if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
+		}
 		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
 			netbuf_delete(flyEhternetInfo.pNetbuf);       
 		}
+		#else
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwipTask"));
+		OSTimeDly(OS_TICKS_PER_SEC );  
 		#endif
 	}
 }
@@ -318,7 +321,7 @@ void LwipTaskCreate(void)
 	INT8U Res;
 	Res = OSTaskCreate(LwipTask, 										//执行函数
 				 NULL,	  												//带入的参数
-				 &GstkLwip[LWIP_TASK_START_STK_SIZE-1],			//堆栈由高地址往底地址增长
+				 &GstkLwip[LWIP_TASK_START_STK_SIZE-1],					//堆栈由高地址往底地址增长
 				 (INT8U)PRIO_LWIP										//任务优先级
 				 );
 	if(OS_NO_ERR != Res)
