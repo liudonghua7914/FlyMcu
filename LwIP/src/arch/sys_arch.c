@@ -176,7 +176,7 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 	sys_mbox_t m_box = *mbox;
 	if(NULL != msg)
 	{
-		err = OSMboxPost(m_box,msg);
+		err = OSQPost(m_box,msg);
 		if(OS_NO_ERR != err)
 		{
 			err = ERR_MEM;

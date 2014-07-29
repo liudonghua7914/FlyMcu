@@ -127,25 +127,18 @@ void GoT0WhatStatus(uint32_t Address)
 ***************************************************************************************************************************/
 void SysTick_Handler(void)
 {
- 	
+ 	#if OS_CRITICAL_METHOD == 3
+        OS_CPU_SR cpu_sr;
+    #endif
+	
 	SYSTICK_ClearCounterFlag();
 	do 
 	{
 		interfaceInfo.SysTickCount++;
-	} while (0 == interfaceInfo.SysTickCount);
+	} while (0 == interfaceInfo.SysTickCount);	
 	
-	
-	 #if OS_CRITICAL_METHOD == 3
-        OS_CPU_SR cpu_sr;
-    #endif 
-
-    
-    OS_ENTER_CRITICAL();                         
-    OSIntNesting++;
-    OS_EXIT_CRITICAL();
-
+	OSIntEnter();
     OSTimeTick();                                                       /*  Call uC/OS-II's OSTimeTick()*/
-
     OSIntExit();              
 }
 /***************************************************************************************************************************

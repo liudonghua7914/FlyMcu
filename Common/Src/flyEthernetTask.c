@@ -14,7 +14,7 @@
 #define		NON_API		0
 #define		RAW_API		1
 #define		LWIP_API	2
-#define		WHAT_API	NON_API
+#define		WHAT_API	LWIP_API
 
 
 BYTE ip_addr[] = {192,168,8,100};
@@ -302,6 +302,7 @@ void LwipTask(void *arg)
 		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
+			netconn_write(flyEhternetInfo.pNewnetconn,"my name is LDH!!!",strlen("my name is LDH!!!"), NETCONN_NOCOPY);
 			netbuf_delete(flyEhternetInfo.pNetbuf);       
 		}
 		#else

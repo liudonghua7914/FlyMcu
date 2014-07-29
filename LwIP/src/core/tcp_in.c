@@ -1126,7 +1126,7 @@ tcp_receive(struct tcp_pcb *pcb)
     while (pcb->unsent != NULL &&
            TCP_SEQ_BETWEEN(ackno, ntohl(pcb->unsent->tcphdr->seqno) + 
                            TCP_TCPLEN(pcb->unsent), pcb->snd_nxt)) {
-      LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_receive: removing %"U32_F":%"U32_F" from pcb->unsent\n",
+      LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_receive: xxxooremoving %"U32_F":%"U32_F" from pcb->unsent\n",
                                     ntohl(pcb->unsent->tcphdr->seqno), ntohl(pcb->unsent->tcphdr->seqno) +
                                     TCP_TCPLEN(pcb->unsent)));
 
