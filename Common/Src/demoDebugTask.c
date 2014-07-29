@@ -8,7 +8,7 @@
 
 #include "..\..\Common\Src\fifo.c"
 
-#define		TASK_DEBUG	0
+#define		TASK_DEBUG	1
 
 
 T_Queue DemoQueue;
