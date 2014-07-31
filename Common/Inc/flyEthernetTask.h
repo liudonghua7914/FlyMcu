@@ -12,7 +12,7 @@
 #include "tcp.h"
 #include "netif.h"
 //#include "Ethernetif.h"
-
+#include "fs_include.h"
 
 #ifndef		_FLYETHERNETGOABLE_
 	#define		FLYETHERNET_GLOBAL		extern
@@ -24,7 +24,7 @@
 
 #define  		LWIP_TASK_START_STK_SIZE         		200
 #define  		FLYETHERNET_TASK_START_STK_SIZE         250
-#define 		RECSIZE			256
+#define 		RECSIZE			512
 
 #define	 MAC0		0X1e
 #define	 MAC1		0x30
@@ -51,6 +51,7 @@ typedef struct
 	struct netconn *pNewnetconn;
 	struct netif netif;
 	struct netbuf *pNetbuf;
+	FS_FILE *httpfd;
 	OS_EVENT *LwIPSem;
 }T_FLYEHTERNET_INFO;	
 
@@ -61,7 +62,7 @@ FLYETHERNET_GLOBAL UINT GstkLwip[FLYETHERNET_TASK_START_STK_SIZE];
 FLYETHERNET_GLOBAL void FlyEthernetCreate(void);
 FLYETHERNET_GLOBAL void LwipTaskCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
-
+FLYETHERNET_GLOBAL BOOL OpenMMCFile(char *name);
 #endif
 
 

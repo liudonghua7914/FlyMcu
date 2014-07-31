@@ -15,13 +15,36 @@
 void ipcFileSystemInit(void)
 {
 	flyFileTaskCreate();
-	flyFileInfo.fp = NULL;
-	flyFileInfo.fp = FS_FOpen("mmc:\\test.txt","ab+");
-	if(NULL == flyFileInfo.fp)
+	if(NULL ==  FS_FOpen("mmc:\\baidu_http.txt","r"))
 	{
 		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
+		//return FALSE;
 	}
-	LIBMCU_DEBUG(FILE_DEBUG,("\r\n ipcFileSystemInit OK"));
+}
+/***************************************************************************************************************************
+**函数名称:	 	OperationFile
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void OperationFile(BYTE eStatus,BYTE *p,UINT len)
+{
+	BYTE filenamelen = 0;
+	switch(eStatus)
+	{
+		case eOpen:		
+											
+						break;
+						
+		case eRead:
+						break;
+		case eWrite:
+						break;
+		case eClose:
+						break;
+		default:
+						break;
+	}
 }
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcflyFile
@@ -35,32 +58,18 @@ void ipcEventProcflyFile(ULONG enumWhatEvent,ULONG lPara,BYTE *p,UINT length)
 	
 	switch(enumWhatEvent)
 	{
-		case EVENT_GLOBAL_MODULE_INIT:		ipcFileSystemInit();					
-											break;
+		case EVENT_GLOBAL_MODULE_INIT:			ipcFileSystemInit();					
+												break;
 		
 		case EVENT_GLOBAL_FLY_FILE_SDSTATUS:
-											if(lPara)
-											{	
-												FS_FClose(flyFileInfo.fp);
-												flyFileInfo.fp = NULL;
-											}	
-											break;
+											
 			
-		case EVENT_GLOBAL_FLY_FILE_WRITE:	if(flyFileInfo.fp)
-											{									
-												LIBMCU_DEBUG(FILE_DEBUG,("\r\n Write: %d ",length));
-												FS_FWrite(p,1,length,flyFileInfo.fp);
-											}
-											break;		
+		case EVENT_GLOBAL_FLY_FILE_OPERATION:	OperationFile((BYTE)lPara,p,length);
+											
+												break;		
 		
-		case EVENT_GLOBAL_FLY_FILE_READ:	if(flyFileInfo.fp)
-											{									
-												LIBMCU_DEBUG(FILE_DEBUG,("\r\n Read: %d ",length));
-												FS_FRead(p,1,length,flyFileInfo.fp);
-											}
-											break;		
-																	
-		default:							break;
+		
+		default:								break;
 	}
 	
 	if(bRes)

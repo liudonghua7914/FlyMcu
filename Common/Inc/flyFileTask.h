@@ -19,7 +19,15 @@
 	
 #define		BUF_SIZE 	(512)	
 	
-
+enum eFile
+{
+	eOpen = 0,
+	eRead,
+	eWrite,
+	eClose
+};
+	
+	
 
 
 typedef struct	
@@ -38,6 +46,7 @@ typedef struct
 	BOOL bSDStatus;
 	FS_FILE *fp;
 	UINT FileLength;
+	char name[15];
 	char recBuf[BUF_SIZE];
 }FLYFILE_INFO;
 

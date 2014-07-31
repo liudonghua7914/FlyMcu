@@ -178,6 +178,7 @@ void ipcFlyEthernetInit(void)
 	FlyEthernetCreate();
 	LwipTaskCreate();
 	EMAC_IntStart();
+//	OpenMMCFile(NULL);
 }
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
@@ -284,6 +285,61 @@ void FlyEthernetCreate(void)
 	}
 }
 /***************************************************************************************************************************
+**函数名称:	 	OpenMMCFile
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+BOOL OpenMMCFile(char *name)
+{	
+#if 1
+	//flyEhternetInfo.httpfd = FS_FOpen("mmc:\\baidu_http.txt","r");
+	if(NULL ==  FS_FOpen("mmc:\\baidu_http.txt","r"))
+	{
+		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
+		return FALSE;
+	}
+#endif	
+	return TRUE;
+}
+/***************************************************************************************************************************
+**函数名称:	 	HttpsServicer
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void HttpsServicer(char *p,UINT len)
+{
+	UINT16 i = 0;
+	UINT16 copycount = 0;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
+	for(i = 0;i < len;i++)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c",p[i]));
+	}
+	
+	if ((len >= 5) && (strncmp(p, "GET /", 5) == 0))
+	{
+		if(OpenMMCFile("mmc:\\baidu.htm"))
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Open baidu.htm OK size = %d ",flyEhternetInfo.httpfd->size));
+			copycount = flyEhternetInfo.httpfd->size / RECSIZE;
+			for(i  = 0;i < copycount;i++)
+			{
+				FS_FRead(flyEhternetInfo.recBuf,1,RECSIZE,flyEhternetInfo.httpfd);
+				netconn_write(flyEhternetInfo.pNewnetconn,(void *)flyEhternetInfo.recBuf,RECSIZE,NETCONN_NOCOPY);
+			}
+			
+			if(flyEhternetInfo.httpfd->size % RECSIZE)
+			{
+				FS_FRead(flyEhternetInfo.recBuf,1,flyEhternetInfo.httpfd->size % RECSIZE,flyEhternetInfo.httpfd);
+				netconn_write(flyEhternetInfo.pNewnetconn,(void *)flyEhternetInfo.recBuf,flyEhternetInfo.httpfd->size % RECSIZE,NETCONN_NOCOPY);
+			}
+			FS_FClose(flyEhternetInfo.httpfd);
+		}
+	}
+}
+/***************************************************************************************************************************
 **函数名称:	 	LwipTaskCreate
 **函数功能:	 	
 **入口参数:
@@ -291,6 +347,9 @@ void FlyEthernetCreate(void)
 ***************************************************************************************************************************/
 void LwipTask(void *arg)
 {
+	char *ch = NULL;
+	UINT16 len = 0;
+	UINT16 i = 0;
 	lwipServiceInit();
 	while(1)
 	{
@@ -302,7 +361,8 @@ void LwipTask(void *arg)
 		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
-			netconn_write(flyEhternetInfo.pNewnetconn,"my name is LDH!!!",strlen("my name is LDH!!!"), NETCONN_NOCOPY);
+			netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
+			HttpsServicer(ch,len);
 			netbuf_delete(flyEhternetInfo.pNetbuf);       
 		}
 		#else

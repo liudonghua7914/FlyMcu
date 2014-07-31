@@ -451,12 +451,13 @@ void FS_MMC_HW_X_ReadWrite(FS_u32 id,FS_u8 *pWrite, int wLen,FS_u8 *pRead, int r
 {
 	FS_u8 times = 0;
 	FS_u32 i;
-	
+	#if 0
 	LIBMCU_DEBUG(MMC_DEBUG,("\r\n FS_MMC_HW_X_ReadWrite: "));
 	for(i = 0;i < wLen;i++)
 	{
 		LIBMCU_DEBUG(MMC_DEBUG,("%x ",pWrite[i]));
 	}
+	#endif
 	FS_MMC_HW_X_SetCS(id,0);
 	FlySSP_ReadWrite(FLY_SSP0,FLYWRITE,pWrite,wLen);
 	do
@@ -543,7 +544,7 @@ BOOL FS_MMC_FS_MMC_HW_X_CheckType(FS_u32 id)
 			}
 		}
 		Count++;
-	}while(Count < 200);
+	}while(Count < 500);
 	return bRes;
 }
 /*****************************************************************************************************************************
@@ -571,8 +572,7 @@ BOOL FS_MMC_FS_MMC_HW_X_ActiveCard(FS_u32 id)
 		SDCardType = eSDV2_0;
 		if(FS_MMC_FS_MMC_HW_X_CheckType(id))
 		{
-			bRes =  TRUE;
-			
+			bRes =  TRUE;	
 		}
 	}
 	else

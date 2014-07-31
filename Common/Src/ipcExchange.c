@@ -8,8 +8,9 @@ void ipcExchangeEvent(ULONG enumWhatEvent,ULONG lPara,BYTE *p,ULONG length)
 	if(enumWhatEvent > EVENT_GLOBAL_INIT_MIN && enumWhatEvent < EVENT_GLOBAL_INIT_MAX)
 	{
 		ipcEventProcflySystem(enumWhatEvent,lPara,p,length);
-		ipcEventProcflyFile(enumWhatEvent,lPara,p,length);
 		ipcEventProcFlylyEthernet(enumWhatEvent,lPara,p,length);
+		ipcEventProcflyFile(enumWhatEvent,lPara,p,length);
+		
 		ipcEventProcDemoDebug(enumWhatEvent,lPara,p,length);
 //		ipcEventProcFlyEEPROM(enumWhatEvent,lPara,p,length);
 	}
