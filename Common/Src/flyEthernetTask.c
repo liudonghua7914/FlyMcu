@@ -178,7 +178,7 @@ void ipcFlyEthernetInit(void)
 	FlyEthernetCreate();
 	LwipTaskCreate();
 	EMAC_IntStart();
-//	OpenMMCFile(NULL);
+//	OpenMMCFile("mmc:\\http\\baidu.txt");
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	ipcEventProcFlylyEthernet
@@ -293,8 +293,8 @@ void FlyEthernetCreate(void)
 BOOL OpenMMCFile(char *name)
 {	
 #if 1
-	//flyEhternetInfo.httpfd = FS_FOpen("mmc:\\baidu_http.txt","r");
-	if(NULL ==  FS_FOpen("mmc:\\baidu_http.txt","r"))
+	flyEhternetInfo.httpfd = FS_FOpen(name,"r");
+	if(NULL == flyEhternetInfo.httpfd)
 	{
 		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
 		return FALSE;
@@ -320,7 +320,7 @@ void HttpsServicer(char *p,UINT len)
 	
 	if ((len >= 5) && (strncmp(p, "GET /", 5) == 0))
 	{
-		if(OpenMMCFile("mmc:\\baidu.htm"))
+		if(OpenMMCFile("mmc:\\http\\baidu.txt"))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Open baidu.htm OK size = %d ",flyEhternetInfo.httpfd->size));
 			copycount = flyEhternetInfo.httpfd->size / RECSIZE;

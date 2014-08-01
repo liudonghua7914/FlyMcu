@@ -15,11 +15,11 @@
 void ipcFileSystemInit(void)
 {
 	flyFileTaskCreate();
-	if(NULL ==  FS_FOpen("mmc:\\baidu_http.txt","r"))
-	{
-		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
-		//return FALSE;
-	}
+//	if(NULL ==  FS_FOpen("mmc:\\text.txt","r"))
+//	{
+//		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
+//		//return FALSE;
+//	}
 }
 /***************************************************************************************************************************
 **º¯ÊýÃû³Æ:	 	OperationFile
