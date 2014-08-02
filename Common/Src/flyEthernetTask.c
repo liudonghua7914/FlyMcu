@@ -11,10 +11,20 @@
 #include "Ethernetif.h"
 #include "Etharp.h"
 
+
+
 #define		NON_API		0
 #define		RAW_API		1
 #define		LWIP_API	2
 #define		WHAT_API	LWIP_API
+
+#define		APP_HTTP	0
+#define		APP_FTP		1
+
+#define		APP_WHAT	APP_FTP
+
+#include "ftp.c"
+
 
 
 BYTE ip_addr[] = {192,168,8,100};
@@ -212,6 +222,14 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 ***************************************************************************************************************************/
 void lwipServiceInit(void)
 {
+	BYTE port = 0;
+	#if(APP_HTTP == APP_WHAT)
+	port = 80;
+	#elif(APP_FTP == APP_WHAT)
+	port = 21;
+	#endif
+	
+	
 	#if(RAW_API == WHAT_API)
 	flyEhternetInfo.pTcp = tcp_new();
 	if(NULL == flyEhternetInfo.pTcp)
@@ -219,7 +237,7 @@ void lwipServiceInit(void)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_new fail"));
 	}
 	
-	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,80))//IP_ADDR_ANY
+	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,port))//IP_ADDR_ANY
 	{
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_bind fail"));
 	}
@@ -234,7 +252,7 @@ void lwipServiceInit(void)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_new fail"));
 	}
 	
-	if(ERR_OK != netconn_bind(flyEhternetInfo.pNetconn,IP_ADDR_ANY,80))
+	if(ERR_OK != netconn_bind(flyEhternetInfo.pNetconn,IP_ADDR_ANY,port))
 	{
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_bind fail"));
 	}
@@ -340,6 +358,22 @@ void HttpsServicer(char *p,UINT len)
 	}
 }
 /***************************************************************************************************************************
+**函数名称:	 	fptServicer
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void fptServicer(char *p,UINT len)
+{
+	UINT16 i = 0;
+	UINT16 copycount = 0;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
+	for(i = 0;i < len;i++)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c",p[i]));
+	}
+}
+/***************************************************************************************************************************
 **函数名称:	 	LwipTaskCreate
 **函数功能:	 	
 **入口参数:
@@ -358,11 +392,16 @@ void LwipTask(void *arg)
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
 		}
+		
 		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
 			netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
-			HttpsServicer(ch,len);
+			#if(APP_HTTP == APP_WHAT)
+				HttpsServicer(ch,len);
+			#elif(APP_FTP == APP_WHAT)
+				fptServicer(ch,len);
+			#endif
 			netbuf_delete(flyEhternetInfo.pNetbuf);       
 		}
 		#else
