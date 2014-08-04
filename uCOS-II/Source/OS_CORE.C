@@ -16,7 +16,7 @@
 #define  OS_GLOBALS
 #include "includes.h"
 #endif
-
+#include "stdio.h"
 /*
 *********************************************************************************************************
 *                              MAPPING TABLE TO MAP BIT POSITION TO BIT MASK

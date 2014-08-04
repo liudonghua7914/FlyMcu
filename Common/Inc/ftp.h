@@ -6,6 +6,21 @@
 #include "tcp.h"
 #include "ip.h"
 
+typedef void (* _p_ftp_write_data)(char *p,UINT len);
+
+enum ftpd_state_e 
+{
+	FTPD_USER,
+	FTPD_PASS,
+	FTPD_IDLE,
+	FTPD_NLST,
+	FTPD_LIST,
+	FTPD_RETR,
+	FTPD_RNFR,
+	FTPD_STOR,
+	FTPD_QUIT
+};
+
 typedef struct sfifo_t
 {
 	uint8_t xxx;
@@ -19,7 +34,8 @@ struct ftpd_datastate
 
 struct ftpd_msgstate 
 {
-	uint8_t xxx;
+	enum ftpd_state_e state;
+	_p_ftp_write_data ftp_write_data;
 };
 
 struct ftpd_command 

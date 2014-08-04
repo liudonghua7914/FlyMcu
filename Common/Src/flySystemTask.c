@@ -80,7 +80,7 @@ void flySystemTask(void *arg)
 	{
 		LIBMCU_DEBUG(SYSTEM_DEBUG,("\r\n flySystemTask"));
 		//checkIOStatus();
-		OSTimeDly(OS_TICKS_PER_SEC / 2);  
+		OSTimeDly(OS_TICKS_PER_SEC);  
 	}
 }
 /***************************************************************************************************************************

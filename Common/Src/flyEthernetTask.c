@@ -23,9 +23,9 @@
 
 #define		APP_WHAT	APP_FTP
 
+
+
 #include "ftp.c"
-
-
 
 BYTE ip_addr[] = {192,168,8,100};
 BYTE gw_addr[] = {192, 168, 1, 1};
@@ -177,7 +177,7 @@ void ipcFlyEthernetInit(void)
 	
 	tcpip_init(NULL,NULL);
 	
-	IP4_ADDR(&flyEhternetInfo.ipaddr,  192, 168, 8, 100);
+	IP4_ADDR(&flyEhternetInfo.ipaddr,  192, 168, 8, 7);
 	IP4_ADDR(&flyEhternetInfo.netmask, 255, 255, 0, 0);
 	IP4_ADDR(&flyEhternetInfo.gw, 192, 168, 1, 1);
 	
@@ -226,6 +226,7 @@ void lwipServiceInit(void)
 	#if(APP_HTTP == APP_WHAT)
 	port = 80;
 	#elif(APP_FTP == APP_WHAT)
+	ftpd_init();
 	port = 21;
 	#endif
 	
@@ -358,19 +359,72 @@ void HttpsServicer(char *p,UINT len)
 	}
 }
 /***************************************************************************************************************************
+**函数名称:	 	fptWriteData
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void fptWriteData(char *p,UINT len)
+{
+	UINT i = 0;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len: %d ",len));
+	if(len)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData: "));
+		for(i = 0;i < len;i++)
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("%x ",p[i]));
+		}	
+		
+		if(ERR_OK != netconn_write(flyEhternetInfo.pNewnetconn,(void *)p,len,NETCONN_NOCOPY))
+		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData  fail"));
+		}
+	}
+}
+/***************************************************************************************************************************
 **函数名称:	 	fptServicer
 **函数功能:	 	
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-void fptServicer(char *p,UINT len)
+void fptServicer(void)
 {
-	UINT16 i = 0;
-	UINT16 copycount = 0;
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
-	for(i = 0;i < len;i++)
+	BOOL bRec = FALSE;
+	BYTE state = getFTPMsgState();
+	switch(state)
 	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c",p[i]));
+		case FTPD_USER:		setFTPMsgState(FTPD_IDLE);
+							send_msg(msg220);
+							break;
+		case FTPD_PASS:		
+							break;
+		case FTPD_IDLE:		
+							break;
+		case FTPD_NLST:		
+							break;
+		case FTPD_LIST:		
+							break;
+		case FTPD_RETR:		
+							break;
+		case FTPD_RNFR:		
+							break;
+		case FTPD_STOR:		
+							break;
+		case FTPD_QUIT:		
+							break;
+		default:			
+							break;
+						
+	}
+	
+	if(bRec)
+	{
+		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
+		{
+			netbuf_delete(flyEhternetInfo.pNetbuf);    
+		}
+		   
 	}
 }
 /***************************************************************************************************************************
@@ -384,29 +438,35 @@ void LwipTask(void *arg)
 	char *ch = NULL;
 	UINT16 len = 0;
 	UINT16 i = 0;
+	err_t err;
 	lwipServiceInit();
 	while(1)
 	{
 		#if(LWIP_API == WHAT_API)
-		if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
-		}
-		
-		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
-			netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
+			if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
+			}
 			#if(APP_HTTP == APP_WHAT)
-				HttpsServicer(ch,len);
+				if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
+				{
+					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
+					netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
+					HttpsServicer(ch,len);	
+					netbuf_delete(flyEhternetInfo.pNetbuf);       
+				}
 			#elif(APP_FTP == APP_WHAT)
-				fptServicer(ch,len);
+				err = netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn);
+				if(ERR_OK == err)
+				{
+					fptServicer();
+					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept OK"));
+				}
+				
 			#endif
-			netbuf_delete(flyEhternetInfo.pNetbuf);       
-		}
 		#else
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwipTask"));
-		OSTimeDly(OS_TICKS_PER_SEC );  
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwipTask"));
+			OSTimeDly(OS_TICKS_PER_SEC );  
 		#endif
 	}
 }
