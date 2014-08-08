@@ -10,7 +10,7 @@ typedef void (* _p_ftp_write_data)(char *p,UINT len);
 
 enum ftpd_state_e 
 {
-	FTPD_USER,
+	FTPD_USER = 0,
 	FTPD_PASS,
 	FTPD_IDLE,
 	FTPD_NLST,
@@ -19,6 +19,35 @@ enum ftpd_state_e
 	FTPD_RNFR,
 	FTPD_STOR,
 	FTPD_QUIT
+};
+
+enum ftpnum
+{
+	N0 = 0,
+	N1,
+	N2,
+	N3,
+	N4,
+	N5,
+	N6,
+	N7,
+	N8,
+	N9,
+	N10,
+	N11,
+	N12,
+	N13,
+	N14,
+	N15,
+	N16,
+	N17,
+	N18,
+	N19,
+	N20,
+	N21,
+	N22,
+	N23,
+	MAX,
 };
 
 typedef struct sfifo_t
@@ -34,14 +63,16 @@ struct ftpd_datastate
 
 struct ftpd_msgstate 
 {
+	UINT16 len;
 	enum ftpd_state_e state;
 	_p_ftp_write_data ftp_write_data;
 };
 
 struct ftpd_command 
 {
+	BYTE id;
 	char *cmd;
-	void (*func) (const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm);
+	void (*func) (const char *arg,struct ftpd_msgstate *fsm);
 };
 
 

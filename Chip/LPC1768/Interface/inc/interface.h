@@ -47,7 +47,7 @@ extern void printf_w(const char *format, ...);
 #define		MMC_DEBUG			LIBMCU_DBG_ON
 #define		FS_DEBUG			LIBMCU_DBG_ON
 #define		INTER_DEBUG			LIBMCU_DBG_ON
-
+#define		FTP_DEBUG			LIBMCU_DBG_ON
 
 #define	 FLY_SSP0		0x00
 #define	 FLY_SSP1		0x01

@@ -230,9 +230,11 @@ static void send_msg(char *msg, ...)
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_user(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_user(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_user "));
+	send_msg(msg331);
+	fsm->state = FTPD_PASS;
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_pass
@@ -240,9 +242,11 @@ static void cmd_user(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_pass(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_pass(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_pass "));
+	send_msg(msg230);
+	fsm->state = FTPD_IDLE;
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_port
@@ -250,9 +254,30 @@ static void cmd_pass(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_port(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_port(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	
+	BYTE i = 0;
+	BYTE offset = 1;
+	BYTE data[6];
+	BYTE cnt = 0;
+	char *ch = (char *)arg;
+	char *pt = &ch[strlen("PORT")];
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_syst "));
+	for(i = 0;i < fsm->len;i+= offset)
+	{
+		if((pt[i] != ' ') && (pt[i] != '.') && (pt[i] != ','))
+		{
+			//offset = snprintf(&data[cnt],sizeof(data[cnt],"%s",&pt[i]);
+			printf("\r\n offset = %d ",offset);
+			cnt = (cnt + 1) % (sizeof(data));
+		}
+		else
+		{
+			offset = 1;
+		}
+	}
+	
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_quit
@@ -260,7 +285,7 @@ static void cmd_port(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_quit(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_quit(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -270,7 +295,7 @@ static void cmd_quit(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_cwd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_cwd(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -280,7 +305,7 @@ static void cmd_cwd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_cdup(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_cdup(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -290,7 +315,7 @@ static void cmd_cdup(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_pwd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_pwd(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -300,7 +325,7 @@ static void cmd_pwd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_nlst(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_nlst(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -310,7 +335,7 @@ static void cmd_nlst(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_list(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_list(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -320,7 +345,7 @@ static void cmd_list(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_retr(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_retr(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -330,7 +355,7 @@ static void cmd_retr(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_stor(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_stor(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -340,7 +365,7 @@ static void cmd_stor(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_noop(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_noop(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -350,9 +375,10 @@ static void cmd_noop(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_syst(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_syst(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_syst "));
+	send_msg(msg214SYST, "UNIX");
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_abrt
@@ -360,7 +386,7 @@ static void cmd_syst(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_abrt(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_abrt(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -370,7 +396,7 @@ static void cmd_abrt(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_type(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_type(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -380,7 +406,7 @@ static void cmd_type(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_mode(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_mode(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -390,7 +416,7 @@ static void cmd_mode(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_rnfr(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_rnfr(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -400,7 +426,7 @@ static void cmd_rnfr(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_rnto(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_rnto(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -410,7 +436,7 @@ static void cmd_rnto(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate 
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_mkd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_mkd(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -420,7 +446,7 @@ static void cmd_mkd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_rmd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_rmd(const char *arg,struct ftpd_msgstate *fsm)
 {
 
 }
@@ -430,43 +456,69 @@ static void cmd_rmd(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static void cmd_dele(const char *arg, struct tcp_pcb *pcb, struct ftpd_msgstate *fsm)
+static void cmd_dele(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_dele "));
 }
 
 
 
 static struct ftpd_command ftpd_commands[] = 
 {
-	{"USER",cmd_user},
-	{"PASS",cmd_pass},
-	{"PORT",cmd_port},
-	{"QUIT",cmd_quit},
-	{"CWD", cmd_cwd},
-	{"CDUP",cmd_cdup},
-	{"PWD", cmd_pwd},
-	{"XPWD", cmd_pwd},
-	{"NLST", cmd_nlst},
-	{"LIST", cmd_list},
-	{"RETR", cmd_retr},
-	{"STOR", cmd_stor},
-	{"NOOP", cmd_noop},
-	{"SYST", cmd_syst},
-	{"ABOR", cmd_abrt},
-	{"TYPE", cmd_type},
-	{"MODE", cmd_mode},
-	{"RNFR", cmd_rnfr},
-	{"RNTO", cmd_rnto},
-	{"MKD", cmd_mkd},
-	{"XMKD", cmd_mkd},
-	{"RMD", cmd_rmd},
-	{"XRMD", cmd_rmd},
-	{"DELE", cmd_dele},
-	{NULL, NULL}
+	{N0,"USER",cmd_user},
+	{N1,"PASS",cmd_pass},
+	{N2,"PORT",cmd_port},
+	{N3,"QUIT",cmd_quit},
+	{N4,"CWD", cmd_cwd},
+	{N5,"CDUP",cmd_cdup},
+	{N6,"PWD", cmd_pwd},
+	{N7,"XPWD", cmd_pwd},
+	{N8,"NLST", cmd_nlst},
+	{N9,"LIST", cmd_list},
+	{N10,"RETR", cmd_retr},
+	{N11,"STOR", cmd_stor},
+	{N12,"NOOP", cmd_noop},
+	{N13,"SYST", cmd_syst},
+	{N14,"ABOR", cmd_abrt},
+	{N15,"TYPE", cmd_type},
+	{N16,"MODE", cmd_mode},
+	{N17,"RNFR", cmd_rnfr},
+	{N18,"RNTO", cmd_rnto},
+	{N19,"MKD", cmd_mkd},
+	{N20,"XMKD", cmd_mkd},
+	{N21,"RMD", cmd_rmd},
+	{N22,"XRMD", cmd_rmd},
+	{N23,"DELE", cmd_dele},
+	{MAX,NULL, NULL}
 };
 
-
+/***************************************************************************************************************************
+**函数名称:	 	ftpd_msgrecv
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+static err_t ftpd_msgrecv(char *p,UINT16 len)
+{
+	BYTE i;
+	struct ftpd_command *ftp_cmd = &ftpd_commands[0];
+	for(i = 0;i < MAX;i++)
+	{	
+		printf("\r\n ftpd_msgrecv i = %d len = %d ",i,strlen(ftp_cmd->cmd));
+		ftp_cmd = &ftpd_commands[i];
+		if(!memcmp(p,ftp_cmd->cmd,strlen(ftp_cmd->cmd)))
+		{
+			printf("\r\n ftp_cmd->func");
+			if(ftp_cmd->func)
+			{
+				fsm->len = len;
+				ftp_cmd->func(p,fsm);
+			}
+			break;
+		}	
+	}
+	return ERR_OK;
+}
 
 void ftpd_init(void)
 {

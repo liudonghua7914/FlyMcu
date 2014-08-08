@@ -31,7 +31,7 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 	err_t Res = ERR_VAL;
 	sys_sem_t tm_sem;
 	tm_sem = OSSemCreate(count);
-	
+	printf("\r\n sys_sem_new");
 	if(NULL != tm_sem)
 	{
 		*sem = tm_sem;
@@ -116,7 +116,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 	err_t err = ERR_MEM;
 	sys_mbox_t m_box;
 	m_box = OSQCreate(&ArrayOfMsg[cur_q][0],size);
-	
+	printf("\r\n sys_mbox_new");
 	if(NULL == m_box)
 	{
 		return ERR_MEM;

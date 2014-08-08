@@ -526,6 +526,7 @@ netconn_recv(struct netconn *conn, struct netbuf **new_buf)
     buf = (struct netbuf *)memp_malloc(MEMP_NETBUF);
     if (buf == NULL) {
       NETCONN_SET_SAFE_ERR(conn, ERR_MEM);
+	  LWIP_DEBUGF(API_LIB_DEBUG, ("netconn_recv memp_malloc fail\n"));
       return ERR_MEM;
     }
 

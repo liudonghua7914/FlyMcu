@@ -24,8 +24,9 @@
 #define		APP_WHAT	APP_FTP
 
 
-
 #include "ftp.c"
+
+
 
 BYTE ip_addr[] = {192,168,8,100};
 BYTE gw_addr[] = {192, 168, 1, 1};
@@ -373,7 +374,7 @@ void fptWriteData(char *p,UINT len)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData: "));
 		for(i = 0;i < len;i++)
 		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("%x ",p[i]));
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",p[i]));
 		}	
 		
 		if(ERR_OK != netconn_write(flyEhternetInfo.pNewnetconn,(void *)p,len,NETCONN_NOCOPY))
@@ -382,6 +383,7 @@ void fptWriteData(char *p,UINT len)
 		}
 	}
 }
+
 /***************************************************************************************************************************
 **函数名称:	 	fptServicer
 **函数功能:	 	
@@ -390,16 +392,23 @@ void fptWriteData(char *p,UINT len)
 ***************************************************************************************************************************/
 void fptServicer(void)
 {
-	BOOL bRec = FALSE;
+	char *ch = NULL;
+	BOOL bRec = TRUE;
+	UINT16 len;
+	UINT16 i = 0;
 	BYTE state = getFTPMsgState();
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptServicer state = %d ",state));
+	
 	switch(state)
 	{
 		case FTPD_USER:		setFTPMsgState(FTPD_IDLE);
 							send_msg(msg220);
+							bRec = TRUE;
 							break;
 		case FTPD_PASS:		
 							break;
-		case FTPD_IDLE:		
+		
+		case FTPD_IDLE:		bRec = TRUE;
 							break;
 		case FTPD_NLST:		
 							break;
@@ -422,9 +431,20 @@ void fptServicer(void)
 	{
 		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 		{
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n xxoo netconn_recv msg"));
+			netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netbuf_data: "));
+			for(i = 0;i < len;i++)
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",ch[i]));
+			}
+			ftpd_msgrecv(ch,len);
+		}
+		
+		if(flyEhternetInfo.pNetbuf)
+		{
 			netbuf_delete(flyEhternetInfo.pNetbuf);    
 		}
-		   
 	}
 }
 /***************************************************************************************************************************
@@ -440,34 +460,42 @@ void LwipTask(void *arg)
 	UINT16 i = 0;
 	err_t err;
 	lwipServiceInit();
+	err = netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn);
+	if(ERR_OK != err)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
+	}
 	while(1)
 	{
 		#if(LWIP_API == WHAT_API)
-			if(ERR_OK != netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn))
-			{
-				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
-			}
+			
 			#if(APP_HTTP == APP_WHAT)
 				if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
 				{
 					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
 					netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
 					HttpsServicer(ch,len);	
-					netbuf_delete(flyEhternetInfo.pNetbuf);       
+					netconn_close(conn);
+					netbuf_delete(flyEhternetInfo.pNetbuf);   
+					netconn_delete(flyEhternetInfo.pNewnetconn);
 				}
 			#elif(APP_FTP == APP_WHAT)
-				err = netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn);
 				if(ERR_OK == err)
 				{
 					fptServicer();
 					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept OK"));
-				}
-				
+				}	
 			#endif
 		#else
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwipTask"));
 			OSTimeDly(OS_TICKS_PER_SEC );  
 		#endif
+	}
+	if(1)//flyEhternetInfo.pNewnetconn
+	{
+		netconn_close(flyEhternetInfo.pNewnetconn);
+		netconn_delete(flyEhternetInfo.pNewnetconn);
+		flyEhternetInfo.pNewnetconn = NULL;
 	}
 }
 /***************************************************************************************************************************
