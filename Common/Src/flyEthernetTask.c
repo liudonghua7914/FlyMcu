@@ -213,8 +213,6 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 		ipcClearEvent(enumWhatEvent);
 	}
 }
-
-
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
 **函数功能:	 	
@@ -365,10 +363,11 @@ void HttpsServicer(char *p,UINT len)
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-void fptWriteData(char *p,UINT len)
+void fptWriteData(struct netconn *ftpconn,char *p,UINT len)
 {
 	UINT i = 0;
 	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len: %d ",len));
+
 	if(len)
 	{
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData: "));
@@ -377,7 +376,7 @@ void fptWriteData(char *p,UINT len)
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",p[i]));
 		}	
 		
-		if(ERR_OK != netconn_write(flyEhternetInfo.pNewnetconn,(void *)p,len,NETCONN_NOCOPY))
+		if(ERR_OK != netconn_write(ftpconn,(void *)p,len,NETCONN_NOCOPY))
 		{
 			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData  fail"));
 		}
@@ -402,7 +401,7 @@ void fptServicer(void)
 	switch(state)
 	{
 		case FTPD_USER:		setFTPMsgState(FTPD_IDLE);
-							send_msg(msg220);
+							msg_weclome(flyEhternetInfo.pNewnetconn);
 							bRec = TRUE;
 							break;
 		case FTPD_PASS:		
@@ -438,7 +437,7 @@ void fptServicer(void)
 			{
 				LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",ch[i]));
 			}
-			ftpd_msgrecv(ch,len);
+			ftpd_msgrecv(flyEhternetInfo.pNewnetconn,ch,len);
 		}
 		
 		if(flyEhternetInfo.pNetbuf)

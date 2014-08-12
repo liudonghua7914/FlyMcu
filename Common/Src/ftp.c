@@ -20,45 +20,46 @@
 	
 	
 
-  序列		响应代码						解释说明
-	1.		  110						新文件指示器上的重启标记
-	2.		  120						服务器贮备就绪时间(分钟数)
-	3.		  125						打开数据连接,开始传输
-	4.		  150						打开连接
-	5.		  200						成功
-	6.		  202						命令没有执行
-	7.		  211						系统状态回复
-	8.		  212						目录状态回复
-	9.		  213						文件状态回复
-	10.		  214						帮助信息回复
-	11.		  215						系统类型回复
-	12.		  220					    服务就绪
-	13.		  221						退出网络
-	14.		  225						打开数据连接
-	15. 	  227						结束数据连接
-	16.       230						登陆英特网
-	17.		  250						文件行为完成
-	18.		  257						文件路径名建立
-	19.		  331						要求密码
-	20.		  332						要求账号
-	21. 	  350						文件行为暂停
-	22.		  421						服务关闭
-	23.		  425						无法打开数据连接
-	24.		  426						结束连接
-	25.		  450						文件不可以
-	26.		  451						遇到本地错误
-	27.		  452						磁盘空间不足
-	28.		  500						无效命令
-	29.		  501						错误参数
-	30.		  502						命令没有执行
-	31.		  503						错误指令序列
-	32.		  504						无效命令参数
-	33.		  530						未登录网络
-	34.		  532						存储文件需要账号
-	35.		  550						文件不可以
-	36.		  551						不知道页的类型
-	37.		  552						超出存储分配
-	38.		  553						文件名不允许
+响应代码						解释说明
+  110						新文件指示器上的重启标记
+  120						服务器贮备就绪时间(分钟数)
+  125						打开数据连接,开始传输
+  150						打开连接
+  200						成功
+  202						命令没有执行
+  211						系统状态回复
+  212						目录状态回复
+  213						文件状态回复
+  214						帮助信息回复
+  215						系统类型回复
+  220					    服务就绪
+  221						退出网络
+  225						打开数据连接
+  226						关闭数据连接,请求文件操作成功
+  227						结束数据连接
+  230						登陆英特网
+  250						文件行为完成
+  257						文件路径名建立
+  331						要求密码
+  332						要求账号
+  350						文件行为暂停
+  421						服务关闭
+  425						无法打开数据连接
+  426						结束连接
+  450						文件不可以
+  451						遇到本地错误
+  452						磁盘空间不足
+  500						无效命令
+  501						错误参数
+  502						命令没有执行
+  503						错误指令序列
+  504						无效命令参数
+  530						未登录网络
+  532						存储文件需要账号
+  550						文件不可以
+  551						不知道页的类型
+552						超出存储分配
+  553						文件名不允许
 */
 
 #define msg110 "110 MARK %s = %s."
@@ -114,13 +115,11 @@
 #define msg553 "553 Requested action not taken."
 
 
-
-
-
 static struct ftpd_msgstate msgstate;
 static struct ftpd_msgstate *fsm;
-static char buffer[256];
-
+static struct ftpd_datastate datastate;
+static char buffer[128]; 
+static char *pDirPatch = NULL;
 static const char *month_table[12] = 
 {
 	"Jan",
@@ -222,7 +221,22 @@ static void send_msg(char *msg, ...)
 	vsprintf(buffer, msg, arg);
 	va_end(arg);
 	strcat(buffer, "\r\n");
-	fsm->ftp_write_data(buffer,strlen(buffer));
+	fsm->ftp_write_data(fsm->ftpcontrl,buffer,strlen(buffer));
+}
+/***************************************************************************************************************************
+**函数名称:	 	send_data
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+static void send_data(char *p,UINT len)
+{
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n send_data len %d ",len));
+	memset(buffer,'\0',sizeof(buffer));
+	memcpy(buffer,p,len);
+	strcat(buffer, "\r\n");
+	len += 2;
+	fsm->ftp_write_data(fsm->ftpconn,buffer,len);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_user
@@ -256,28 +270,39 @@ static void cmd_pass(const char *arg,struct ftpd_msgstate *fsm)
 ***************************************************************************************************************************/
 static void cmd_port(const char *arg,struct ftpd_msgstate *fsm)
 {
-	
 	BYTE i = 0;
-	BYTE offset = 1;
 	BYTE data[6];
+	char chdata[5];
 	BYTE cnt = 0;
+	BYTE cnt1 = 0;
 	char *ch = (char *)arg;
-	char *pt = &ch[strlen("PORT")];
-	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_syst "));
-	for(i = 0;i < fsm->len;i+= offset)
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_port "));
+	memset(chdata,'\0',sizeof(chdata));
+	memset(data,0,sizeof(data));
+	for(i = 0;i < fsm->len;i++)
 	{
-		if((pt[i] != ' ') && (pt[i] != '.') && (pt[i] != ','))
+		if((' ' == ch[i]) || ('.' == ch[i]) || (',' == ch[i])|| ('\r' == ch[i])|| ('\n' == ch[i]))
 		{
-			//offset = snprintf(&data[cnt],sizeof(data[cnt],"%s",&pt[i]);
-			printf("\r\n offset = %d ",offset);
-			cnt = (cnt + 1) % (sizeof(data));
+			if(cnt)
+			{
+				cnt = 0;
+				data[cnt1] = atol(chdata);
+				printf("\r\n data %d ",data[cnt1]);
+				cnt1 = (cnt1 + 1) % sizeof(data);
+				memset(chdata,'\0',sizeof(chdata));		
+			}
 		}
-		else
+		else if((ch[i] >= '0') && (ch[i] <= '9'))
 		{
-			offset = 1;
+			chdata[cnt] = ch[i];
+			cnt = (cnt + 1) % sizeof(chdata);
 		}
 	}
 	
+	IP4_ADDR(&fsm->dataip, (BYTE) data[0], (BYTE) data[1], (BYTE) data[2], (BYTE) data[3]);
+	fsm->dataport = ((UINT16) (data[4] << 8) | (UINT16) data[5]);
+	send_msg(msg200);
+	printf("\r\n dataip %u dataport %d ",fsm->dataip.addr,fsm->dataport);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_quit
@@ -317,7 +342,88 @@ static void cmd_cdup(const char *arg,struct ftpd_msgstate *fsm)
 ***************************************************************************************************************************/
 static void cmd_pwd(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_pwd "));
+	send_msg(msg257PWD,pDirPatch);
+}
+/***************************************************************************************************************************
+**函数名称:	 	open_dataconnection
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+static int open_dataconnection(struct ftpd_msgstate *fsm)
+{
+	int err = -1;
+	
+	fsm->datafs = &datastate;
+	memset(fsm->datafs,0,sizeof(struct ftpd_datastate));
+	fsm->ftpconn = netconn_new(NETCONN_TCP);
+	if(NULL == fsm->ftpconn)
+	{
+		LIBMCU_DEBUG(FTP_DEBUG,("\r\n netconn_new fail"));
+		return err;
+	}
+	
+	if(ERR_OK != netconn_bind(fsm->ftpconn,IP_ADDR_ANY,20))
+	{
+		LIBMCU_DEBUG(FTP_DEBUG,("\r\n netconn_bind fail"));
+		return err;
+	}
+	
+	if(ERR_OK != netconn_connect(fsm->ftpconn,&fsm->dataip,fsm->dataport))
+	{
+		LIBMCU_DEBUG(FTP_DEBUG,("\r\n netconn_connect fail"));
+		return err;
+	}
+	return 0;
+}
+/***************************************************************************************************************************
+**函数名称:	 	cmd_list_common
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+static void cmd_list_common(const char *p,struct ftpd_msgstate *fsm)
+{
+	FS_DIR *dirp = NULL;
+	struct FS_DIRENT *direntp;
+	
+	if(!p)
+	{
+		return;
+	}
+	
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n FS_OpenDir: %s ",p));
+	dirp = FS_OpenDir(p);
+	if(!dirp)
+	{
+		send_msg(msg425);
+		send_msg(msg426);
+		send_msg(msg451);
+		LIBMCU_DEBUG(FTP_DEBUG,("\r\n FS_OpenDir fail "));
+	}
+	
+	
+	if(0 != open_dataconnection(fsm))
+	{
+		send_msg(msg451);
+		LIBMCU_DEBUG(FTP_DEBUG,("\r\n open_dataconnection fail "));
+	}
+	
+	send_msg(msg150);
+	if(dirp)
+	{
+		do
+		{
+			memset(direntp->d_name,'\0',32);
+			direntp = FS_ReadDir(dirp);
+			if(direntp)
+			{
+				LIBMCU_DEBUG(FTP_DEBUG,("\r\n d_name %s ",direntp->d_name));
+				send_data(direntp->d_name,strlen(direntp->d_name));
+			}
+		}while(direntp);
+	}
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_nlst
@@ -327,7 +433,8 @@ static void cmd_pwd(const char *arg,struct ftpd_msgstate *fsm)
 ***************************************************************************************************************************/
 static void cmd_nlst(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_nlst "));
+	cmd_list_common(pDirPatch,fsm);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_list
@@ -337,7 +444,8 @@ static void cmd_nlst(const char *arg,struct ftpd_msgstate *fsm)
 ***************************************************************************************************************************/
 static void cmd_list(const char *arg,struct ftpd_msgstate *fsm)
 {
-
+	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_list_common "));
+	cmd_list_common(pDirPatch,fsm);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_retr
@@ -491,14 +599,24 @@ static struct ftpd_command ftpd_commands[] =
 	{N23,"DELE", cmd_dele},
 	{MAX,NULL, NULL}
 };
-
+/***************************************************************************************************************************
+**函数名称:	 	msg_weclome
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void msg_weclome(struct netconn *ftpconn)
+{
+	fsm->ftpcontrl = ftpconn;
+	send_msg(msg220);
+}
 /***************************************************************************************************************************
 **函数名称:	 	ftpd_msgrecv
 **函数功能:	 	
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-static err_t ftpd_msgrecv(char *p,UINT16 len)
+static err_t ftpd_msgrecv(struct netconn *ftpconn,char *p,UINT16 len)
 {
 	BYTE i;
 	struct ftpd_command *ftp_cmd = &ftpd_commands[0];
@@ -511,6 +629,7 @@ static err_t ftpd_msgrecv(char *p,UINT16 len)
 			printf("\r\n ftp_cmd->func");
 			if(ftp_cmd->func)
 			{
+				fsm->ftpcontrl = ftpconn;
 				fsm->len = len;
 				ftp_cmd->func(p,fsm);
 			}
@@ -525,5 +644,9 @@ void ftpd_init(void)
 	fsm = &msgstate;
 	fsm->state = FTPD_USER;
 	fsm->ftp_write_data = fptWriteData;
+	memset(fsm->curPatch,'\0',sizeof(fsm->curPatch));
+	pDirPatch = fsm->curPatch;
+	fsm->patchLen = strlen("mmc:");
+	memcpy(pDirPatch,"mmc:",fsm->patchLen);
 }
 

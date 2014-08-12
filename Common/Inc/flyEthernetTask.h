@@ -22,7 +22,7 @@
 #endif
 
 
-#define  		LWIP_TASK_START_STK_SIZE         		200
+#define  		LWIP_TASK_START_STK_SIZE         		250
 #define  		FLYETHERNET_TASK_START_STK_SIZE         250
 #define 		RECSIZE			512
 
@@ -63,7 +63,7 @@ FLYETHERNET_GLOBAL void FlyEthernetCreate(void);
 FLYETHERNET_GLOBAL void LwipTaskCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
 FLYETHERNET_GLOBAL BOOL OpenMMCFile(char *name);
-FLYETHERNET_GLOBAL void fptWriteData(char *p,UINT len);
+FLYETHERNET_GLOBAL void fptWriteData(struct netconn *ftpconn,char *p,UINT len);
 #endif
 
 

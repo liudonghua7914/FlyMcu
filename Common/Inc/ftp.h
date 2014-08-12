@@ -6,7 +6,7 @@
 #include "tcp.h"
 #include "ip.h"
 
-typedef void (* _p_ftp_write_data)(char *p,UINT len);
+typedef void (* _p_ftp_write_data)(struct netconn *ftpconn,char *p,UINT len);
 
 enum ftpd_state_e 
 {
@@ -64,8 +64,17 @@ struct ftpd_datastate
 struct ftpd_msgstate 
 {
 	UINT16 len;
+	struct ip_addr dataip;
+	UINT16 dataport;
+	char curPatch[128];
+	char curname[32];
+	BYTE patchLen;
 	enum ftpd_state_e state;
+	struct ftpd_datastate *datafs;
 	_p_ftp_write_data ftp_write_data;
+	
+	struct netconn *ftpconn;
+	struct netconn *ftpcontrl;
 };
 
 struct ftpd_command 
