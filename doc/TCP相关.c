@@ -966,3 +966,323 @@ sys_timeout_debug(u32_t msecs, sys_timeout_handler handler, void *arg, const cha
 		}
 		
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	ipX_output(PCB_ISIPV6(pcb), seg->p, &pcb->local_ip, &pcb->remote_ip, pcb->ttl,
+    pcb->tos, IP_PROTO_TCP);
+	
+	err_t
+ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+          u8_t ttl, u8_t tos, u8_t proto)
+		
+
+
+
+
+#define ip_addr_set(dest, src) ((dest)->addr = \
+                                    ((src) == NULL ? 0 : \
+                                    (src)->addr))		
+		
+#define ipX_addr_set(is_ipv6, dest, src)        ip_addr_set(dest, src)
+
+	err_t
+tcp_write(struct tcp_pcb *pcb, const void *arg, u16_t len, u8_t apiflags)
+{
+  struct pbuf *concat_p = NULL;
+  struct tcp_seg *last_unsent = NULL, *seg = NULL, *prev_seg = NULL, *queue = NULL;
+  u16_t pos = 0; /* position in 'arg' data */
+  u16_t queuelen;
+  u8_t optlen = 0;
+  u8_t optflags = 0;
+  u16_t oversize = 0;
+  u16_t oversize_used = 0;
+
+  err_t err;
+
+
+  err = tcp_write_checks(pcb, len);
+  if (err != ERR_OK) {
+    return err;
+  }
+  queuelen = pcb->snd_queuelen;
+
+  if (pcb->unsent != NULL) {
+    u16_t space;
+    u16_t unsent_optlen;
+
+    /* @todo: this could be sped up by keeping last_unsent in the pcb */
+    for (last_unsent = pcb->unsent; last_unsent->next != NULL;
+         last_unsent = last_unsent->next);
+
+    /* Usable space at the end of the last unsent segment */
+    unsent_optlen = LWIP_TCP_OPT_LENGTH(last_unsent->flags);
+    space = pcb->mss - (last_unsent->len + unsent_optlen);
+
+    /*
+     * Phase 1: Copy data directly into an oversized pbuf.
+     *
+     * The number of bytes copied is recorded in the oversize_used
+     * variable. The actual copying is done at the bottom of the
+     * function.
+     */
+
+    oversize = pcb->unsent_oversize;
+    if (oversize > 0) {
+      seg = last_unsent;
+      oversize_used = oversize < len ? oversize : len;
+      pos += oversize_used;
+      oversize -= oversize_used;
+      space -= oversize_used;
+    }
+  
+
+    /*
+     * Phase 2: Chain a new pbuf to the end of pcb->unsent.
+     *
+     * We don't extend segments containing SYN/FIN flags or options
+     * (len==0). The new pbuf is kept in concat_p and pbuf_cat'ed at
+     * the end.
+     */
+    if ((pos < len) && (space > 0) && (last_unsent->len > 0)) {
+      u16_t seglen = space < len - pos ? space : len - pos;
+      seg = last_unsent;
+
+      /* Create a pbuf with a copy or reference to seglen bytes. We
+       * can use PBUF_RAW here since the data appears in the middle of
+       * a segment. A header will never be prepended. */
+      if (apiflags & TCP_WRITE_FLAG_COPY) {
+        /* Data is copied */
+        if ((concat_p = tcp_pbuf_prealloc(PBUF_RAW, seglen, space, &oversize, pcb, apiflags, 1)) == NULL) {
+          LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2,
+                      ("tcp_write : could not allocate memory for pbuf copy size %"U16_F"\n",
+                       seglen));
+          goto memerr;
+        }
+        last_unsent->oversize_left = oversize;
+        TCP_DATA_COPY2(concat_p->payload, (u8_t*)arg + pos, seglen, &concat_chksum, &concat_chksum_swapped);
+
+      } else {
+        /* Data is not copied */
+        if ((concat_p = pbuf_alloc(PBUF_RAW, seglen, PBUF_ROM)) == NULL) {
+          LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2,
+                      ("tcp_write: could not allocate memory for zero-copy pbuf\n"));
+          goto memerr;
+        }
+
+        /* reference the non-volatile payload data */
+        concat_p->payload = (u8_t*)arg + pos;
+      }
+
+      pos += seglen;
+      queuelen += pbuf_clen(concat_p);
+    }
+  }
+
+  /*
+   * Phase 3: Create new segments.
+   *
+   * The new segments are chained together in the local 'queue'
+   * variable, ready to be appended to pcb->unsent.
+   */
+  while (pos < len) {
+    struct pbuf *p;
+    u16_t left = len - pos;
+    u16_t max_len = pcb->mss - optlen;
+    u16_t seglen = left > max_len ? max_len : left;
+
+    if (apiflags & TCP_WRITE_FLAG_COPY) {
+      /* If copy is set, memory should be allocated and data copied
+       * into pbuf */
+      if ((p = tcp_pbuf_prealloc(PBUF_TRANSPORT, seglen + optlen, pcb->mss, &oversize, pcb, apiflags, queue == NULL)) == NULL) {
+        LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_write : could not allocate memory for pbuf copy size %"U16_F"\n", seglen));
+        goto memerr;
+      }
+      LWIP_ASSERT("tcp_write: check that first pbuf can hold the complete seglen",
+                  (p->len >= seglen));
+      TCP_DATA_COPY2((char *)p->payload + optlen, (u8_t*)arg + pos, seglen, &chksum, &chksum_swapped);
+    } else {
+      /* Copy is not set: First allocate a pbuf for holding the data.
+       * Since the referenced data is available at least until it is
+       * sent out on the link (as it has to be ACKed by the remote
+       * party) we can safely use PBUF_ROM instead of PBUF_REF here.
+       */
+      struct pbuf *p2;
+
+      if ((p2 = pbuf_alloc(PBUF_TRANSPORT, seglen, PBUF_ROM)) == NULL) {
+        LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_write: could not allocate memory for zero-copy pbuf\n"));
+        goto memerr;
+      }
+
+      /* reference the non-volatile payload data */
+      p2->payload = (u8_t*)arg + pos;
+
+      /* Second, allocate a pbuf for the headers. */
+      if ((p = pbuf_alloc(PBUF_TRANSPORT, optlen, PBUF_RAM)) == NULL) {
+        /* If allocation fails, we have to deallocate the data pbuf as
+         * well. */
+        pbuf_free(p2);
+        LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_write: could not allocate memory for header pbuf\n"));
+        goto memerr;
+      }
+      /* Concatenate the headers and data pbufs together. */
+      pbuf_cat(p/*header*/, p2/*data*/);
+    }
+
+    queuelen += pbuf_clen(p);
+
+    /* Now that there are more segments queued, we check again if the
+     * length of the queue exceeds the configured maximum or
+     * overflows. */
+    if ((queuelen > TCP_SND_QUEUELEN) || (queuelen > TCP_SNDQUEUELEN_OVERFLOW)) {
+      LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_write: queue too long %"U16_F" (%"U16_F")\n", queuelen, TCP_SND_QUEUELEN));
+      pbuf_free(p);
+      goto memerr;
+    }
+
+    if ((seg = tcp_create_segment(pcb, p, 0, pcb->snd_lbb + pos, optflags)) == NULL) {
+      goto memerr;
+    }
+    seg->oversize_left = oversize;
+
+
+    /* first segment of to-be-queued data? */
+    if (queue == NULL) {
+      queue = seg;
+    } else {
+      /* Attach the segment to the end of the queued segments */
+      LWIP_ASSERT("prev_seg != NULL", prev_seg != NULL);
+      prev_seg->next = seg;
+    }
+    /* remember last segment of to-be-queued data for next iteration */
+    prev_seg = seg;
+
+    LWIP_DEBUGF(TCP_OUTPUT_DEBUG | LWIP_DBG_TRACE, ("tcp_write: queueing %"U32_F":%"U32_F"\n",
+      ntohl(seg->tcphdr->seqno),
+      ntohl(seg->tcphdr->seqno) + TCP_TCPLEN(seg)));
+
+    pos += seglen;
+  }
+
+  /*
+   * All three segmentation phases were successful. We can commit the
+   * transaction.
+   */
+
+  /*
+   * Phase 1: If data has been added to the preallocated tail of
+   * last_unsent, we update the length fields of the pbuf chain.
+   */
+
+  if (oversize_used > 0) {
+    struct pbuf *p;
+    /* Bump tot_len of whole chain, len of tail */
+    for (p = last_unsent->p; p; p = p->next) {
+      p->tot_len += oversize_used;
+      if (p->next == NULL) {
+        TCP_DATA_COPY((char *)p->payload + p->len, arg, oversize_used, last_unsent);
+        p->len += oversize_used;
+      }
+    }
+    last_unsent->len += oversize_used;
+  }
+  pcb->unsent_oversize = oversize;
+
+
+  /*
+   * Phase 2: concat_p can be concatenated onto last_unsent->p
+   */
+  if (concat_p != NULL) {
+    LWIP_ASSERT("tcp_write: cannot concatenate when pcb->unsent is empty",
+      (last_unsent != NULL));
+    pbuf_cat(last_unsent->p, concat_p);
+    last_unsent->len += concat_p->tot_len;
+
+  }
+
+  /*
+   * Phase 3: Append queue to pcb->unsent. Queue may be NULL, but that
+   * is harmless
+   */
+  if (last_unsent == NULL) {
+    pcb->unsent = queue;
+  } else {
+    last_unsent->next = queue;
+  }
+
+  /*
+   * Finally update the pcb state.
+   */
+  pcb->snd_lbb += len;
+  pcb->snd_buf -= len;
+  pcb->snd_queuelen = queuelen;
+
+  LWIP_DEBUGF(TCP_QLEN_DEBUG, ("tcp_write: %"S16_F" (after enqueued)\n",
+    pcb->snd_queuelen));
+  if (pcb->snd_queuelen != 0) {
+    LWIP_ASSERT("tcp_write: valid queue length",
+                pcb->unacked != NULL || pcb->unsent != NULL);
+  }
+
+  /* Set the PSH flag in the last segment that we enqueued. */
+  if (seg != NULL && seg->tcphdr != NULL && ((apiflags & TCP_WRITE_FLAG_MORE)==0)) {
+    TCPH_SET_FLAG(seg->tcphdr, TCP_PSH);
+  }
+
+  return ERR_OK;
+memerr:
+  pcb->flags |= TF_NAGLEMEMERR;
+  TCP_STATS_INC(tcp.memerr);
+
+  if (concat_p != NULL) {
+    pbuf_free(concat_p);
+  }
+  if (queue != NULL) {
+    tcp_segs_free(queue);
+  }
+  if (pcb->snd_queuelen != 0) {
+    LWIP_ASSERT("tcp_write: valid queue length", pcb->unacked != NULL ||
+      pcb->unsent != NULL);
+  }
+  LWIP_DEBUGF(TCP_QLEN_DEBUG | LWIP_DBG_STATE, ("tcp_write: %"S16_F" (with mem err)\n", pcb->snd_queuelen));
+  return ERR_MEM;
+}

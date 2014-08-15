@@ -47,6 +47,7 @@ enum ftpnum
 	N21,
 	N22,
 	N23,
+//	N24,
 	MAX,
 };
 
@@ -58,7 +59,8 @@ typedef struct sfifo_t
 
 struct ftpd_datastate 
 {
-	uint8_t xxx;
+	BOOL  bConnect;
+	FS_DIR *dirp;
 };
 
 struct ftpd_msgstate 
@@ -66,15 +68,14 @@ struct ftpd_msgstate
 	UINT16 len;
 	struct ip_addr dataip;
 	UINT16 dataport;
-	char curPatch[128];
+	char curPatch[64];
 	char curname[32];
 	BYTE patchLen;
 	enum ftpd_state_e state;
 	struct ftpd_datastate *datafs;
-	_p_ftp_write_data ftp_write_data;
-	
-	struct netconn *ftpconn;
-	struct netconn *ftpcontrl;
+
+	FTP_INFO *pftpinfo;
+	FTP_FUNC *pftpfunc;
 };
 
 struct ftpd_command 

@@ -11,21 +11,73 @@
 #include "Ethernetif.h"
 #include "Etharp.h"
 
-
+#define		APP_HTTP	0
+#define		APP_FTP		1
+#define		APP_WHAT	APP_FTP
 
 #define		NON_API		0
 #define		RAW_API		1
 #define		LWIP_API	2
-#define		WHAT_API	LWIP_API
+#define		WHAT_API	RAW_API
 
-#define		APP_HTTP	0
-#define		APP_FTP		1
 
-#define		APP_WHAT	APP_FTP
+#if(APP_FTP == APP_WHAT)
 
+
+enum Attri
+{
+	eNON = 0,
+	eRAW,
+	eLWIP
+};
+
+enum CtrMsg
+{
+	eCtr = 0,
+	eMsg
+};
+
+typedef struct
+{
+	BYTE attri;
+	struct tcp_pcb *ftpRAWControl;
+	struct tcp_pcb *ftpRAWDataMsg;
+	BYTE ctrOrMsg;
+	
+	tcp_connected_fn connected;
+	tcp_accept_fn accept;
+	tcp_poll_fn poll;
+	tcp_recv_fn recv;
+	tcp_sent_fn sent;
+}FTP_INFO;
+
+
+typedef void (*_p_ftp_arg)(FTP_INFO *pftpInfo,void *arg);
+typedef void (*_p_ftp_accept)(FTP_INFO *pftpInfo);
+typedef void (*_p_ftp_new)(FTP_INFO *pftpInfo);
+typedef void (*_p_ftp_bind)(FTP_INFO *pftpInfo,UINT16 port);
+typedef void (*_p_ftp_listen)(FTP_INFO *pftpInfo);
+typedef void (*_p_ftp_connect)(FTP_INFO *pftpInfo,struct ip_addr dataip,UINT16 port);
+typedef void (*_p_ftp_writeData)(FTP_INFO *pftpInfo,char *p,UINT16 len);
+typedef void (*_p_ftp_in)(char *p,UINT16 len);
+
+typedef struct
+{
+	_p_ftp_new  p_ftp_new;
+	_p_ftp_bind p_ftp_bind;
+	_p_ftp_listen p_ftp_listen;
+	_p_ftp_connect p_ftp_connect;
+	_p_ftp_accept p_ftp_accept;
+	_p_ftp_writeData p_ftp_writeData;
+	_p_ftp_arg p_ftp_arg;
+}FTP_FUNC;
+
+
+FTP_INFO ftp_info;
+FTP_FUNC ftp_func;
 
 #include "ftp.c"
-
+#endif
 
 
 BYTE ip_addr[] = {192,168,8,100};
@@ -33,7 +85,13 @@ BYTE gw_addr[] = {192, 168, 1, 1};
 BYTE netmask[] = { 255, 255, 0, 0};	
 BYTE mac_addr[] = {MAC0,MAC1,MAC2,MAC3,MAC4,MAC5};
 
-
+err_t ftp_connected_fn(void *arg, struct tcp_pcb *tpcb, err_t err);
+err_t ftp_poll_fn(void *arg, struct tcp_pcb *tpcb);
+err_t ftp_sent_fn(void *arg, struct tcp_pcb *tpcb,u16_t len);
+void ftp_arg(FTP_INFO *pftpInfo,void *arg);
+void ftp_recv(FTP_INFO *pftpInfo);
+void ftp_poll(FTP_INFO *pftpInfo,BYTE interval);
+void ftp_sent(FTP_INFO *pftpInfo);
 /***************************************************************************************************************************
 **函数名称:	 	ENET_IRQHandler
 **函数功能:	 	
@@ -53,59 +111,6 @@ void ENET_IRQHandler(void)
 	
 	LPC_EMAC->IntClear = LPC_EMAC->IntStatus;
 	//OSIntExit();
-}
-/***************************************************************************************************************************
-**函数名称:	 	ipcEventProcFlylyEthernet
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-static err_t client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
-{
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n client_connected"));
-	return ERR_OK;
-}
-/***************************************************************************************************************************
-**函数名称:	 	LwIP_TimeOutTask
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-void LwIP_TimeOutTask(void *arg)
-{
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_TimeOutTask %d ", OSTimeGet()));
-}
-
-/***************************************************************************************************************************
-**函数名称:	 	tcp_recv_back
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-err_t tcp_recv_back(void *arg, struct tcp_pcb *tpcb,struct pbuf *p, err_t err)
-{
-	UINT16 len;
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_recv_back"));
-	
-	len = p->len + p->tot_len;
-	
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
-	pbuf_free(p);
-	tcp_close(tpcb);
-	return ERR_OK;
-}
-/***************************************************************************************************************************
-**函数名称:	 	LwIP_Accept
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-err_t LwIP_Accept(void *arg, struct tcp_pcb *newpcb, err_t err)
-{
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwIP_Accept"));
-	tcp_setprio(newpcb,TCP_PRIO_MIN);
-	tcp_recv(newpcb,tcp_recv_back);
-	return ERR_OK;
 }
 /***************************************************************************************************************************
 **函数名称:	 	ip_input
@@ -189,7 +194,7 @@ void ipcFlyEthernetInit(void)
 	FlyEthernetCreate();
 	LwipTaskCreate();
 	EMAC_IntStart();
-//	OpenMMCFile("mmc:\\http\\baidu.txt");
+
 }
 /***************************************************************************************************************************
 **函数名称:	 	ipcEventProcFlylyEthernet
@@ -213,57 +218,7 @@ void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t l
 		ipcClearEvent(enumWhatEvent);
 	}
 }
-/***************************************************************************************************************************
-**函数名称:	 	ipcEventProcFlylyEthernet
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-void lwipServiceInit(void)
-{
-	BYTE port = 0;
-	#if(APP_HTTP == APP_WHAT)
-	port = 80;
-	#elif(APP_FTP == APP_WHAT)
-	ftpd_init();
-	port = 21;
-	#endif
-	
-	
-	#if(RAW_API == WHAT_API)
-	flyEhternetInfo.pTcp = tcp_new();
-	if(NULL == flyEhternetInfo.pTcp)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_new fail"));
-	}
-	
-	if(ERR_OK != tcp_bind(flyEhternetInfo.pTcp,IP_ADDR_ANY,port))//IP_ADDR_ANY
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_bind fail"));
-	}
-	
-	flyEhternetInfo.pTcp = tcp_listen(flyEhternetInfo.pTcp);
-	
-	tcp_accept(flyEhternetInfo.pTcp,LwIP_Accept);
-	#elif(LWIP_API == WHAT_API)
-	flyEhternetInfo.pNetconn = netconn_new(NETCONN_TCP);
-	if(NULL == flyEhternetInfo.pNetconn)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_new fail"));
-	}
-	
-	if(ERR_OK != netconn_bind(flyEhternetInfo.pNetconn,IP_ADDR_ANY,port))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_bind fail"));
-	}
-	
-	if(ERR_OK != netconn_listen(flyEhternetInfo.pNetconn))
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_listen fail"));
-	}
-	
-	#endif
-}
+
 /***************************************************************************************************************************
 **函数名称:	 	FlyEthernetTask
 **函数功能:	 	
@@ -302,6 +257,342 @@ void FlyEthernetCreate(void)
 		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Res = %d",Res));
 	}
 }
+
+
+#if(APP_FTP == APP_WHAT)
+/***************************************************************************************************************************
+**函数名称:	 	ftp_recv_fn
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+err_t ftp_recv_fn(void *arg, struct tcp_pcb *tpcb,struct pbuf *p, err_t err)
+{
+	UINT16 len;
+	UINT16 i;
+	struct pbuf *q;
+	static char recBuf[512];
+	char *pt = recBuf;
+	_p_ftp_in p_ftp_in;
+	p_ftp_in = (_p_ftp_in)arg;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n tcp_recv_back"));
+	for(q = p; q != NULL; q = q->next) 
+	{
+		memcpy(pt, q->payload, q->len);
+		pt += q->len;
+	}
+	len = p->len + p->tot_len;	
+	pt = recBuf;
+	if(len >= 512)
+	{
+		len = 512;
+	}
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
+	for(i = 0;i < len;i++)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n %c ",pt[i]));
+	}
+	p_ftp_in(pt,len);
+	pbuf_free(p);
+	return ERR_OK;
+}
+/***************************************************************************************************************************
+**函数名称:	 	ftp_accept_fn
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+err_t ftp_accept_fn(void *arg, struct tcp_pcb *newpcb, err_t err)
+{
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ftp_accept_fn"));	
+	ftp_info.ftpRAWControl = newpcb;
+	ftp_info.poll = ftp_poll_fn;
+	ftp_info.recv = ftp_recv_fn;
+	ftp_info.sent = ftp_sent_fn;
+	ftp_info.connected = ftp_connected_fn;
+	
+	ftp_arg(&ftp_info,(void *)ftp_in);
+	ftp_recv(&ftp_info);
+	ftp_poll(&ftp_info,1);
+	ftp_sent(&ftp_info);
+	send_msg(msg220);
+	return ERR_OK;
+}
+
+/***************************************************************************************************************************
+**函数名称:	 	ftp_sent_fn
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+err_t ftp_sent_fn(void *arg, struct tcp_pcb *tpcb,u16_t len)
+{
+	return ERR_OK;
+}
+
+/***************************************************************************************************************************
+**函数名称:	 	fpt_new
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_new(FTP_INFO *pftpInfo)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			pftpInfo->ftpRAWControl = tcp_new();
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ftpRAWControl %p",pftpInfo->ftpRAWControl));
+			if(NULL == pftpInfo->ftpRAWControl)
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Control tcp_new Fail"));
+			}
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			pftpInfo->ftpRAWDataMsg = tcp_new();
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ftpRAWDataMsg %p",pftpInfo->ftpRAWDataMsg));
+			if(NULL == pftpInfo->ftpRAWDataMsg)
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n DataMsg tcp_new Fail"));
+			}
+		}
+	}
+	else if(eLWIP == pftpInfo->attri)
+	{
+	
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	fpt_bind
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_bind(FTP_INFO *pftpInfo,UINT16 port)
+{
+	struct tcp_pcb *pcb;
+	struct netconn *net_conn;
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			if(ERR_OK != tcp_bind(pftpInfo->ftpRAWControl,IP_ADDR_ANY,port))//IP_ADDR_ANY
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Control tcp_bind fail"));
+			}
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			if(ERR_OK != tcp_bind(pftpInfo->ftpRAWDataMsg,IP_ADDR_ANY,port))//IP_ADDR_ANY
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n DataMsg tcp_bind fail"));
+			}
+		}		
+	}
+	else if(eRAW == pftpInfo->attri)
+	{
+	
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	fpt_listen
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_listen(FTP_INFO *pftpInfo)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			pftpInfo->ftpRAWControl = tcp_listen(pftpInfo->ftpRAWControl);
+			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n new ftpRAWControl %p",pftpInfo->ftpRAWControl));
+			if(NULL == pftpInfo->ftpRAWControl)
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Control tcp_listen fail"));
+			}
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			pftpInfo->ftpRAWDataMsg = tcp_listen(pftpInfo->ftpRAWDataMsg);
+			if(NULL == pftpInfo->ftpRAWDataMsg)
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n DataMsg tcp_listen fail"));
+			}
+		}
+	}
+	else if(eRAW == pftpInfo->attri)
+	{
+	
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	fpt_accpet
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_accpet(FTP_INFO *pftpInfo)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_accept(pftpInfo->ftpRAWControl,pftpInfo->accept);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_accept(pftpInfo->ftpRAWDataMsg,pftpInfo->accept);
+		}
+	}
+	else if(eLWIP == pftpInfo->attri)
+	{
+	
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	fpt_connect
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_connect(FTP_INFO *pftpInfo,struct ip_addr dataip,UINT16 port)
+{
+	struct tcp_pcb *pcb;
+	struct netconn *net_conn;
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			if(ERR_OK != tcp_connect(pftpInfo->ftpRAWControl,&dataip,port,pftpInfo->connected))
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Control tcp_connect fail"));
+			}
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			if(ERR_OK != tcp_connect(pftpInfo->ftpRAWDataMsg,&dataip,port,pftpInfo->connected))
+			{
+				LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n DataMsg tcp_connect fail"));
+			}
+		}	
+	}
+	else if(eLWIP == pftpInfo->attri)
+	{
+	
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	ftp_arg
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_arg(FTP_INFO *pftpInfo,void *arg)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_arg(pftpInfo->ftpRAWControl,arg);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_arg(pftpInfo->ftpRAWDataMsg,arg);
+		}
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	ftp_poll
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_poll(FTP_INFO *pftpInfo,BYTE interval)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_poll(pftpInfo->ftpRAWControl,pftpInfo->poll,interval);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_poll(pftpInfo->ftpRAWDataMsg,pftpInfo->poll,interval);
+		}
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	ftp_recv
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_recv(FTP_INFO *pftpInfo)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_recv(pftpInfo->ftpRAWControl,pftpInfo->recv);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_recv(pftpInfo->ftpRAWDataMsg,pftpInfo->recv);
+		}
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	ftp_sent
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_sent(FTP_INFO *pftpInfo)
+{
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_sent(pftpInfo->ftpRAWControl,pftpInfo->sent);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_sent(pftpInfo->ftpRAWDataMsg,pftpInfo->sent);
+		}
+	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	fptWriteData
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void ftp_writeData(FTP_INFO *pftpInfo,char *p,UINT16 len)
+{
+	UINT16 i = 0;
+	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n ftp_writeData"));
+	for(i = 0;i < len;i++)
+	{
+		LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c",p[i]));
+	}
+	
+	if(eRAW == pftpInfo->attri)
+	{
+		if(eCtr == pftpInfo->ctrOrMsg)
+		{
+			tcp_write(pftpInfo->ftpRAWControl,(void *)p,len,1);
+		}
+		else if(eMsg == pftpInfo->ctrOrMsg)
+		{
+			tcp_write(pftpInfo->ftpRAWDataMsg,(void *)p,len,1);
+		}
+	}
+}
+#endif
 /***************************************************************************************************************************
 **函数名称:	 	OpenMMCFile
 **函数功能:	 	
@@ -310,14 +601,6 @@ void FlyEthernetCreate(void)
 ***************************************************************************************************************************/
 BOOL OpenMMCFile(char *name)
 {	
-#if 1
-	flyEhternetInfo.httpfd = FS_FOpen(name,"r");
-	if(NULL == flyEhternetInfo.httpfd)
-	{
-		LIBMCU_DEBUG(FILE_DEBUG,("\r\n FS_FOpen Fail"));
-		return FALSE;
-	}
-#endif	
 	return TRUE;
 }
 /***************************************************************************************************************************
@@ -328,123 +611,55 @@ BOOL OpenMMCFile(char *name)
 ***************************************************************************************************************************/
 void HttpsServicer(char *p,UINT len)
 {
-	UINT16 i = 0;
-	UINT16 copycount = 0;
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len = %d ",len));
-	for(i = 0;i < len;i++)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c",p[i]));
-	}
-	
-	if ((len >= 5) && (strncmp(p, "GET /", 5) == 0))
-	{
-		if(OpenMMCFile("mmc:\\http\\baidu.txt"))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n Open baidu.htm OK size = %d ",flyEhternetInfo.httpfd->size));
-			copycount = flyEhternetInfo.httpfd->size / RECSIZE;
-			for(i  = 0;i < copycount;i++)
-			{
-				FS_FRead(flyEhternetInfo.recBuf,1,RECSIZE,flyEhternetInfo.httpfd);
-				netconn_write(flyEhternetInfo.pNewnetconn,(void *)flyEhternetInfo.recBuf,RECSIZE,NETCONN_NOCOPY);
-			}
-			
-			if(flyEhternetInfo.httpfd->size % RECSIZE)
-			{
-				FS_FRead(flyEhternetInfo.recBuf,1,flyEhternetInfo.httpfd->size % RECSIZE,flyEhternetInfo.httpfd);
-				netconn_write(flyEhternetInfo.pNewnetconn,(void *)flyEhternetInfo.recBuf,flyEhternetInfo.httpfd->size % RECSIZE,NETCONN_NOCOPY);
-			}
-			FS_FClose(flyEhternetInfo.httpfd);
-		}
-	}
-}
-/***************************************************************************************************************************
-**函数名称:	 	fptWriteData
-**函数功能:	 	
-**入口参数:
-**返回参数:
-***************************************************************************************************************************/
-void fptWriteData(struct netconn *ftpconn,char *p,UINT len)
-{
-	UINT i = 0;
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n len: %d ",len));
 
-	if(len)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData: "));
-		for(i = 0;i < len;i++)
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",p[i]));
-		}	
-		
-		if(ERR_OK != netconn_write(ftpconn,(void *)p,len,NETCONN_NOCOPY))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptWriteData  fail"));
-		}
-	}
 }
-
 /***************************************************************************************************************************
 **函数名称:	 	fptServicer
 **函数功能:	 	
 **入口参数:
 **返回参数:
 ***************************************************************************************************************************/
-void fptServicer(void)
+void ftpServicer(void)
 {
-	char *ch = NULL;
-	BOOL bRec = TRUE;
-	UINT16 len;
-	UINT16 i = 0;
-	BYTE state = getFTPMsgState();
-	LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n fptServicer state = %d ",state));
 	
-	switch(state)
-	{
-		case FTPD_USER:		setFTPMsgState(FTPD_IDLE);
-							msg_weclome(flyEhternetInfo.pNewnetconn);
-							bRec = TRUE;
-							break;
-		case FTPD_PASS:		
-							break;
-		
-		case FTPD_IDLE:		bRec = TRUE;
-							break;
-		case FTPD_NLST:		
-							break;
-		case FTPD_LIST:		
-							break;
-		case FTPD_RETR:		
-							break;
-		case FTPD_RNFR:		
-							break;
-		case FTPD_STOR:		
-							break;
-		case FTPD_QUIT:		
-							break;
-		default:			
-							break;
-						
-	}
+}
+/***************************************************************************************************************************
+**函数名称:	 	lwipServiceInit
+**函数功能:	 	
+**入口参数:
+**返回参数:
+***************************************************************************************************************************/
+void lwipServiceInit(void)
+{
+#if(APP_FTP == APP_WHAT)
+	#if(LWIP_API == WHAT_API)
+	ftp_info.attri = eLWIP;
+	#elif(RAW_API == WHAT_API)
 	
-	if(bRec)
-	{
-		if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
-		{
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n xxoo netconn_recv msg"));
-			netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netbuf_data: "));
-			for(i = 0;i < len;i++)
-			{
-				LIBMCU_DEBUG(ETHERNTE_DEBUG,("%c ",ch[i]));
-			}
-			ftpd_msgrecv(flyEhternetInfo.pNewnetconn,ch,len);
-		}
-		
-		if(flyEhternetInfo.pNetbuf)
-		{
-			netbuf_delete(flyEhternetInfo.pNetbuf);    
-		}
-	}
+	ftp_func.p_ftp_accept = ftp_accpet;
+	ftp_func.p_ftp_bind = ftp_bind;
+	ftp_func.p_ftp_connect = ftp_connect;
+	ftp_func.p_ftp_listen = ftp_listen;
+	ftp_func.p_ftp_new = ftp_new;
+	ftp_func.p_ftp_writeData = ftp_writeData;
+	ftp_func.p_ftp_arg = ftp_arg;
+	
+	ftp_info.attri = eRAW;
+	ftp_info.ctrOrMsg = eCtr;
+	ftp_info.accept = ftp_accept_fn;
+	
+	ftp_new(&ftp_info);
+	ftp_bind(&ftp_info,21);
+	ftp_listen(&ftp_info);
+	ftp_accpet(&ftp_info);
+	
+	ftpd_init(&ftp_info,&ftp_func);
+	#else
+	
+	#endif
+#else
+	
+#endif	
 }
 /***************************************************************************************************************************
 **函数名称:	 	LwipTaskCreate
@@ -459,42 +674,18 @@ void LwipTask(void *arg)
 	UINT16 i = 0;
 	err_t err;
 	lwipServiceInit();
-	err = netconn_accept(flyEhternetInfo.pNetconn,&flyEhternetInfo.pNewnetconn);
-	if(ERR_OK != err)
-	{
-		LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept fail"));
-	}
+	
 	while(1)
 	{
-		#if(LWIP_API == WHAT_API)
+		#if(APP_FTP == APP_WHAT)
+			#if(LWIP_API == WHAT_API)
 			
-			#if(APP_HTTP == APP_WHAT)
-				if(ERR_OK == netconn_recv(flyEhternetInfo.pNewnetconn,&flyEhternetInfo.pNetbuf))
-				{
-					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_recv msg"));
-					netbuf_data(flyEhternetInfo.pNetbuf,(void *)&ch,&len);
-					HttpsServicer(ch,len);	
-					netconn_close(conn);
-					netbuf_delete(flyEhternetInfo.pNetbuf);   
-					netconn_delete(flyEhternetInfo.pNewnetconn);
-				}
-			#elif(APP_FTP == APP_WHAT)
-				if(ERR_OK == err)
-				{
-					fptServicer();
-					LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n netconn_accept OK"));
-				}	
+			#elif(RAW_API == WHAT_API)
+			OSTimeDly(OS_TICKS_PER_SEC / 2);  
 			#endif
 		#else
-			LIBMCU_DEBUG(ETHERNTE_DEBUG,("\r\n LwipTask"));
-			OSTimeDly(OS_TICKS_PER_SEC );  
-		#endif
-	}
-	if(1)//flyEhternetInfo.pNewnetconn
-	{
-		netconn_close(flyEhternetInfo.pNewnetconn);
-		netconn_delete(flyEhternetInfo.pNewnetconn);
-		flyEhternetInfo.pNewnetconn = NULL;
+	
+		#endif	
 	}
 }
 /***************************************************************************************************************************

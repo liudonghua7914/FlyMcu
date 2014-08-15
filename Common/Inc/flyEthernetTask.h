@@ -44,8 +44,6 @@ typedef struct
 	struct ip_addr netmask;
 	struct ip_addr gw;
 	
-	struct udp_pcb *pUpdpcb;
-	struct tcp_pcb *pTcp;
 	
 	struct netconn *pNetconn;
 	struct netconn *pNewnetconn;
@@ -63,7 +61,6 @@ FLYETHERNET_GLOBAL void FlyEthernetCreate(void);
 FLYETHERNET_GLOBAL void LwipTaskCreate(void);
 FLYETHERNET_GLOBAL void ipcEventProcFlylyEthernet(ULONG enumWhatEvent,ULONG lPara,BYTE *p,uint8_t length);
 FLYETHERNET_GLOBAL BOOL OpenMMCFile(char *name);
-FLYETHERNET_GLOBAL void fptWriteData(struct netconn *ftpconn,char *p,UINT len);
 #endif
 
 
