@@ -1286,3 +1286,195 @@ memerr:
   LWIP_DEBUGF(TCP_QLEN_DEBUG | LWIP_DBG_STATE, ("tcp_write: %"S16_F" (with mem err)\n", pcb->snd_queuelen));
   return ERR_MEM;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FTP server:
+FileZilla Server version 0.9.46 beta
+Copyright 2001-2014 by Tim Kosse (tim.kosse@filezilla-project.org)
+https://filezilla-project.org/
+Connecting to server...
+Connected, waiting for authentication
+Logged on
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> Connected on port 21, sending welcome message...
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> 220-FileZilla Server version 0.9.46 beta
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> 220-written by Tim Kosse (tim.kosse@filezilla-project.org)
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> 220 Please visit http://sourceforge.net/projects/filezilla/
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> USER ldh
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> 331 Password required for ldh
+(000002)2014/8/17 0:33:32 - (not logged in) (127.0.0.1)> PASS ****
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 230 Logged on
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> SYST
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 215 UNIX emulated by FileZilla
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> FEAT
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 211-Features:
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  MDTM
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  REST STREAM
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  SIZE
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  MLST type*;size*;modify*;
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  MLSD
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  UTF8
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  CLNT
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)>  MFMT
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 211 End
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> PWD
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 257 "/" is current directory.
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> TYPE I
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 200 Type set to I
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> PASV
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 227 Entering Passive Mode (127,0,0,1,199,191)
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> MLSD
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 150 Opening data channel for directory listing of "/"
+(000002)2014/8/17 0:33:32 - ldh (127.0.0.1)> 226 Successfully transferred "/"
+
+
+
+
+FTP Client:
+Status:	Connecting to 127.0.0.1:21...
+Status:	Connection established, waiting for welcome message...
+Response:	220-FileZilla Server version 0.9.46 beta
+Response:	220-written by Tim Kosse (tim.kosse@filezilla-project.org)
+Response:	220 Please visit http://sourceforge.net/projects/filezilla/
+Command:	USER ldh
+Response:	331 Password required for ldh
+Command:	PASS ****
+Response:	230 Logged on
+Command:	SYST
+Response:	215 UNIX emulated by FileZilla
+Command:	FEAT
+Response:	211-Features:
+Response:	 MDTM
+Response:	 REST STREAM
+Response:	 SIZE
+Response:	 MLST type*;size*;modify*;
+Response:	 MLSD
+Response:	 UTF8
+Response:	 CLNT
+Response:	 MFMT
+Response:	211 End
+Status:	Connected
+Status:	Retrieving directory listing...
+Command:	PWD
+Response:	257 "/" is current directory.
+Command:	TYPE I
+Response:	200 Type set to I
+Command:	PASV
+Response:	227 Entering Passive Mode (127,0,0,1,193,255)
+Command:	MLSD
+Response:	150 Opening data channel for directory listing of "/"
+Response:	226 Successfully transferred "/"
+Status:	Directory listing successful
+
+
+
+
+
+
+
+ Process: 220-FileZilla Server version 0.9.46 beta
+
+ fptCmd:USER fly
+
+ Process: 220-written by Tim Kosse (tim.kosse@filezilla-project.org)
+220 Please visit http://sourceforge.net/projects/filezilla/
+
+ Process: 331 Password required for fly
+
+ fptCmd:PASS
+
+ Process: 230 Logged on
+
+ fptCmd:SYST
+
+ Process: 215 UNIX emulated by FileZilla
+
+ fptCmd:FEAT
+
+ Process: 211-Features:
+
+ fptCmd:PWD
+
+ Process:  MDTM
+ REST STREAM
+ SIZE
+ MLST type*;size*;modify*;
+ MLSD
+ UTF8
+ CLNT
+ MFMT
+211 End
+
+ fptCmd:TYPE A
+
+ Process: 257 "/" is current directory.
+
+ Process: 200 Type set to A
+
+ fptCmd:PASV
+
+ Process: 227 Entering Passive Mode (127,0,0,1,236,170)
+
+ data 127
+ data 0
+ data 0
+ data 1
+ data 236
+ data 170
+ net_ip 16777343  port 60586
+ fptCmd:MLSD
+ sftpSerives rev:  type=file;modify=20140730074142;size=48026; baidu.htm
+ ype=dir;modify=20140730074143; baidu_files
+ Process: 150 Opening data channel for directory listing of "/"
+ sftpSerives rev:
+type=file;modify=20140727045408;size=365651997; opencv-2.4.9.exe
+type=dir;modify=20140812050205;
+ Process: 226 Successfully transferred "/"
+
+ Retrieving directory listingsftpSerives rev:  Src
+type=file;modify=20140727045155;size=91875; VS2010   MFC + OpenCV 2.4.1打开�
+�片_百度经� sftpSerives rev:  ��.htm
+type=dir;modify=20140727045157; VS2010   MFC + OpenCV 2.4.1打开图片_百度�
+ sftpSerives rev:
+type=file;modify=20140727044943;size=1729693; 在MFC中通过opencv显示摄像
+头视频或者文?sftpSerives rev:  ��视频.pdf
+type=file;modify=20140727043449;size=37391465; 基于OpenCV的计算机视觉技
+术�?sftpSerives rev:  �现.rar
+
+
+
+
+
+
+
+
+
+
+

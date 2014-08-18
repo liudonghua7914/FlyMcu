@@ -114,7 +114,7 @@
 #define msg552 "552 Requested file action aborted."
 #define msg553 "553 Requested action not taken."
 
-
+static int msgcount = 0;
 static struct ftpd_msgstate msgstate;
 static struct ftpd_msgstate *fsm;
 static struct ftpd_datastate datastate;
@@ -296,9 +296,17 @@ static void send_next_directory(struct ftpd_datastate *fsd, struct tcp_pcb *pcb,
 		}while(direntp);
 	}
 #else
-	
-	send_data("flyaudio",strlen("flyaudio"));
-
+	msgcount++;
+	if(msgcount < 10)
+	{
+		send_data("-rwxrw-r-- 1 user group 1024 NOV 12 17:57 flyaudio.txt",strlen("-rwxrw-r-- 1 user group 1024 NOV 12 17:57 flyaudio.txt"));
+		send_data("drw-rw-rw- 1 user group 0 NOV 12 17:57 flyaudio",strlen("drw-rw-rw- 1 user group 0 NOV 12 17:57 flyaudiot"));
+	}
+	else if(msgcount == 11)
+	{
+		send_msg(msg226);
+		send_msg(msg250);
+	}		
 #endif	
 }
 /***************************************************************************************************************************
@@ -369,6 +377,7 @@ static void cmd_user(const char *arg,struct ftpd_msgstate *fsm)
 {
 	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_user "));
 	send_msg(msg331);
+	msgcount = 0;
 	fsm->state = FTPD_PASS;
 }
 /***************************************************************************************************************************
@@ -473,7 +482,7 @@ static void cmd_cdup(const char *arg,struct ftpd_msgstate *fsm)
 static void cmd_pwd(const char *arg,struct ftpd_msgstate *fsm)
 {
 	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_pwd "));
-	send_msg(msg257PWD,pDirPatch);
+	send_msg(msg257PWD,"d:\\root");//pDirPatch
 }
 
 /***************************************************************************************************************************
@@ -486,8 +495,8 @@ static void cmd_nlst(const char *arg,struct ftpd_msgstate *fsm)
 {
 	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_nlst "));
 	cmd_list_common(pDirPatch,fsm);
+	send_msg(msg125);
 	send_msg(msg150);
-	send_msg(msg212);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_list
@@ -500,7 +509,7 @@ static void cmd_list(const char *arg,struct ftpd_msgstate *fsm)
 	LIBMCU_DEBUG(FTP_DEBUG,("\r\n cmd_list "));
 	cmd_list_common(pDirPatch,fsm);
 	send_msg(msg150);
-	send_msg(msg212);
+	send_msg(msg125);
 }
 /***************************************************************************************************************************
 **函数名称:	 	cmd_retr
